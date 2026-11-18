@@ -2,7 +2,7 @@
 // Kopiera hela filen till ett nytt skript i Scriptable. Inget behöver ändras.
 const LINJE = "gron";
 
-const URL = "https://raw.githubusercontent.com/rdzvz6s5h6-cyber/SL-kollen/main/SL-linje.js";
+const URL = "https://raw.githubusercontent.com/rdzvz6s5h6-cyber/SL-kollen/main/widgets/linjer.js";
 
 const fm = FileManager.local();
 const cache = fm.joinPath(fm.documentsDirectory(), `sl_linje_cache_${LINJE}.js`);

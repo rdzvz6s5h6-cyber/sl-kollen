@@ -1,15 +1,70 @@
-// SL – tunnelbanans röda linje (13, 14), närmaste röda station (automatiskt)
-// Scriptable-widget (medium). Version 2026-11-18: första version, samma layout som pendeln.
-const LITE = 3;        // minuter försenad => gul (3–5)  (obekräftad gräns för tunnelbana)
+// SL-kollen – en widget för flera linjer. Vilken linje styrs av laddaren (SL_LINJE):
+// roda, gron, bla (tunnelbana), roslagsbanan, tvarbanan.
+// Provat mot riktig data: röda och blå linjen. Övriga linjer är ej provade.
+const LITE = 3;        // minuter försenad => gul (3–5)  (obekräftad gräns)
 const MYCKET = 6;      // minuter försenad => röd (6 eller mer)
-const RED_NAMES = [
-  "ropsten", "gärdet", "karlaplan", "östermalmstorg", "t-centralen", "gamla stan",
-  "slussen", "mariatorget", "zinkensdamm", "hornstull", "liljeholmen", "aspudden",
-  "örnsberg", "axelsberg", "mälarhöjden", "bredäng", "sätra", "skärholmen", "vårberg",
-  "vårby gård", "masmo", "fittja", "alby", "hallunda", "norsborg", "midsommarkransen",
-  "telefonplan", "hägerstensåsen", "västertorp", "fruängen", "tekniska högskolan",
-  "stadion", "universitetet", "bergshamra", "danderyds sjukhus", "mörby centrum",
-];
+
+// ---- Inställningar per linje ----
+// transport: läge i SL:s API. group: matchar line.group_of_lines. nums: linjenummer.
+// north/south: regex mot slutstationens namn. titles: rubrik över kolumnerna.
+// names: stationer (gemener) att välja bland först; finns ingen används de 20 närmaste platserna.
+// strict: räkna bara störningar som uttryckligen gäller linjen.
+const CONFIGS = {
+  roda: {
+    key: "roda", label: "röda linjen", transport: "METRO", strict: false,
+    group: /röda/i, nums: ["13", "14"], color: "#E5322D", letter: "T",
+    titles: ["NORR", "SÖDER"], north: /ropsten|mörby/i, south: /norsborg|fruängen/i,
+    names: ["ropsten", "gärdet", "karlaplan", "östermalmstorg", "t-centralen", "gamla stan",
+      "slussen", "mariatorget", "zinkensdamm", "hornstull", "liljeholmen", "aspudden",
+      "örnsberg", "axelsberg", "mälarhöjden", "bredäng", "sätra", "skärholmen", "vårberg",
+      "vårby gård", "masmo", "fittja", "alby", "hallunda", "norsborg", "midsommarkransen",
+      "telefonplan", "hägerstensåsen", "västertorp", "fruängen", "tekniska högskolan",
+      "stadion", "universitetet", "bergshamra", "danderyds sjukhus", "mörby centrum"],
+  },
+  gron: {
+    key: "gron", label: "gröna linjen", transport: "METRO", strict: false,
+    group: /gröna/i, nums: ["17", "18", "19"], color: "#2E9E4F", letter: "T",
+    titles: ["NORR", "SÖDER"], north: /åkeshov|alvik|hässelby/i, south: /skarpnäck|farsta|hagsätra/i,
+    names: ["hässelby strand", "hässelby gård", "johannelund", "vällingby", "råcksta", "blackeberg",
+      "islandstorget", "ängbyplan", "åkeshov", "brommaplan", "abrahamsberg", "stora mossen",
+      "alvik", "kristineberg", "thorildsplan", "fridhemsplan", "rådhuset", "t-centralen",
+      "hötorget", "rådmansgatan", "odenplan", "sankt eriksplan", "s:t eriksplan", "slussen",
+      "medborgarplatsen", "skanstull", "gullmarsplan", "globen", "enskede gård", "sockenplan",
+      "svedmyra", "stureby", "bandhagen", "högdalen", "rågsved", "hagsätra", "blåsut",
+      "sandsborg", "skogskyrkogården", "tallkrogen", "gubbängen", "hökarängen", "farsta",
+      "farsta strand", "björkhagen", "kärrtorp", "bagarmossen", "skarpnäck"],
+  },
+  bla: {
+    key: "bla", label: "blå linjen", transport: "METRO", strict: false,
+    group: /blå/i, nums: ["10", "11"], color: "#0089CA", letter: "T",
+    titles: ["NORR", "SÖDER"], north: /akalla|hjulsta/i, south: /kungsträdgården/i,
+    names: ["kungsträdgården", "t-centralen", "rådhuset", "fridhemsplan", "stadshagen",
+      "västra skogen", "solna centrum", "näckrosen", "hallonbergen", "rinkeby", "tensta",
+      "hjulsta", "kista", "husby", "akalla", "solna strand", "huvudsta"],
+  },
+  roslagsbanan: {
+    key: "roslagsbanan", label: "Roslagsbanan", transport: "TRAIN", strict: true,
+    group: /roslags/i, nums: ["27", "28", "29"], color: "#8E4A9E", letter: "R",
+    titles: ["NORR", "SÖDER"], north: /kårsta|österskär|näsbypark/i, south: /östra|stockholm/i,
+    names: ["stockholms östra", "universitetet", "tekniska högskolan", "stockholms östra",
+      "mörby", "danderyds sjukhus", "djursholms ösby", "ösby", "stocksund", "altorp", "enebyberg",
+      "näsbypark", "näsby allé", "täby kyrkby", "visinge", "viggbyholm", "österskär", "åkersberga",
+      "kårsta", "lindholmen", "rydbo", "bråtorp", "tibble", "roslags näsby", "galoppfältet",
+      "ropsten", "gamla enebyberg", "mörby centrum", "täby centrum", "hägernäs", "ensta", "frösunda",
+      "vallentuna", "ormsta", "molnby", "lindholmen", "össeby", "markim", "rimbo"],
+  },
+  tvarbanan: {
+    key: "tvarbanan", label: "Tvärbanan", transport: "TRAM", strict: true,
+    group: /tvär/i, nums: ["30", "31"], color: "#E8822B", letter: "Tv",
+    titles: ["VÄSTER", "ÖSTER"], north: /alvik|solna/i, south: /sickla|gullmarsplan|liljeholmen/i,
+    names: ["alvik", "stora essingen", "gröndal", "årsta", "lindhagensplan", "liljeholmen",
+      "årstadal", "årstaberg", "årstaberg", "johannesfred", "sofia", "hammarby", "sickla",
+      "sickla kaj", "sickla udde", "gullmarsplan", "solna station", "solna business park",
+      "ulvsunda", "bromsten", "mariehäll", "hägersten", "kungsholmen", "ropsten", "lövholmen",
+      "trekanten", "luma", "aspudden", "norra hammarbyhamnen", "globen", "sicklas"],
+  },
+};
+const CFG = CONFIGS[typeof SL_LINJE !== "undefined" ? SL_LINJE : "roda"] || CONFIGS.roda;
 const FAMILY = config.widgetFamily || "medium";
 const SMALL = FAMILY === "small";
 const ROWS = FAMILY === "large" ? 6 : 3; // stor widget visar fler avgångar per håll
@@ -25,7 +80,7 @@ const PAL = {
 const fm = FileManager.local();
 const dir = fm.documentsDirectory();
 const sitesPath = fm.joinPath(dir, "sl_sites.json");
-const lastPath = fm.joinPath(dir, "sl_last_tbana_roda.json");
+const lastPath = fm.joinPath(dir, `sl_last_${CFG.key}.json`);
 const min = (a, b) => Math.round((a - b) / 60000);
 const shortName = n => String(n)
   .replace(/^Upplands Väsby$/i, "Upl. Väsby")
@@ -62,12 +117,12 @@ async function loadSites() {
 const norm = s => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
 const isRed = d => {
   const l = d.line || {};
-  return /röda/i.test(l.group_of_lines || "") || ["13", "14"].includes(String(l.designation));
+  return CFG.group.test(l.group_of_lines || "") || CFG.nums.includes(String(l.designation));
 };
 
 // Returnerar bara röda linjens avgångar. null = kunde inte hämta.
 async function fetchTrains(id) {
-  const req = new Request(`${BASE}/sites/${id}/departures?transport=METRO`);
+  const req = new Request(`${BASE}/sites/${id}/departures?transport=${CFG.transport}`);
   req.timeoutInterval = 10;
   try {
     const data = await req.loadJSON();
@@ -81,7 +136,7 @@ async function fetchTrains(id) {
 
 // kind: "ok" (inga störningar, grön), "bad" (störning, gul), "fail" (kunde inte hämtas, grå)
 async function loadStatus() {
-  const req = new Request("https://deviations.integration.sl.se/v1/messages?transport_mode=METRO&future=false");
+  const req = new Request(`https://deviations.integration.sl.se/v1/messages?transport_mode=${CFG.transport}&future=false`);
   req.timeoutInterval = 10;
   const fail = { text: "Trafikläget kunde inte hämtas", kind: "fail" };
   try {
@@ -95,16 +150,16 @@ async function loadStatus() {
       .some(x => ACCESS.test(`${x.header || ""} ${x.details || ""}`));
     const red = data.filter(m => !isAccess(m)).filter(m => {
       const lines = (m.scope && m.scope.lines) || [];
-      if (lines.length === 0) return true;
-      return lines.some(l => /röda/i.test(l.group_of_lines || "") ||
-        ["13", "14"].includes(String(l.designation)));
+      if (lines.length === 0) return !CFG.strict;
+      return lines.some(l => CFG.group.test(l.group_of_lines || "") ||
+        CFG.nums.includes(String(l.designation)));
     });
     if (red.length === 0) {
-      return { text: "Inga störningar noterade för röda linjen", kind: "ok" };
+      return { text: `Inga störningar noterade för ${CFG.label}`, kind: "ok" };
     }
     const v = red[0].message_variants || [];
     const sv = v.find(x => x.language === "sv") || v[0] || {};
-    let t = String(sv.header || sv.details || "Störning på röda linjen")
+    let t = String(sv.header || sv.details || `Störning på ${CFG.label}`)
       .replace(/\s+/g, " ").trim();
     if (red.length > 1) t += ` (+${red.length - 1} till)`;
     return { text: t, kind: "bad" };
@@ -122,8 +177,8 @@ async function resolve() {
   const last = readJSON(lastPath);
 
   if (!loc) {
-    const st = last || { id: 9191, name: "T-Centralen" };
-    return { st, note: last ? "senaste plats" : "plats saknas" };
+    if (last) return { st: last, note: "senaste plats" };
+    return { error: "Plats saknas. Kör skriptet i appen." };
   }
   if (last && last.lat !== undefined &&
       km(loc.latitude, loc.longitude, last.lat, last.lon) < 0.4) {
@@ -140,8 +195,8 @@ async function resolve() {
     .map(s => ({ s, d: km(loc.latitude, loc.longitude, s[2], s[3]) }))
     .sort((a, b) => a.d - b.d);
 
-  // 1) närmaste stationer vars namn finns på röda linjen, 2) annars de 20 närmaste platserna
-  const named = byDist(sites.filter(s => RED_NAMES.includes(norm(s[1])))).slice(0, 4);
+  // 1) närmaste stationer vars namn finns på linjen, 2) annars de 20 närmaste platserna
+  const named = byDist(sites.filter(s => CFG.names.includes(norm(s[1])))).slice(0, 4);
   const any = byDist(sites).slice(0, CANDIDATES);
   for (const group of [named, any]) {
     const results = await Promise.all(group.map(x => fetchTrains(x.s[0])));
@@ -155,7 +210,7 @@ async function resolve() {
     }
   }
   if (last) return { st: last, note: "senaste plats" };
-  return { error: "Ingen röd station hittades" };
+  return { error: `Ingen station för ${CFG.label} hittades` };
 }
 
 function info(d, now) {
@@ -244,11 +299,11 @@ function splitTwo(text, max) {
   return l2 ? [l1, l2] : [l1];
 }
 
-// NORR = mot Ropsten/Mörby centrum, SÖDER = mot Norsborg/Fruängen
+// Första kolumnen = norr/väster, andra = söder/öster. Slutstationens namn avgör, annars direction_code.
 function isNorth(d) {
   const n = norm(d.destination);
-  if (n.includes("ropsten") || n.includes("mörby")) return true;
-  if (n.includes("norsborg") || n.includes("fruängen")) return false;
+  if (CFG.north.test(n)) return true;
+  if (CFG.south.test(n)) return false;
   return d.direction_code === 2;
 }
 
@@ -263,8 +318,8 @@ if (!error && !deps) {
 const status = await statusP;
 const now = new Date(); // tidpunkten då informationen hämtades
 const stName = res.st ? res.st.name : "";
-const LINE_COLOR = "#E5322D"; // färg på listen och märket
-const LINE_LETTER = "T";
+const LINE_COLOR = CFG.color; // färg på listen och märket
+const LINE_LETTER = CFG.letter;
 
 // Liten widget: bara nästa avgång per håll
 function smallRow(parent, title, item) {
@@ -314,9 +369,9 @@ function lineBadge(letter, color) {
   dc.setFillColor(new Color(color));
   dc.fillEllipse(new Rect(0, 0, N, N));
   dc.setTextColor(Color.white());
-  dc.setFont(Font.boldSystemFont(54));
+  dc.setFont(Font.boldSystemFont(letter.length > 1 ? 40 : 54));
   dc.setTextAlignedCenter();
-  dc.drawTextInRect(letter, new Rect(0, 15, N, N - 15));
+  dc.drawTextInRect(letter, new Rect(0, letter.length > 1 ? 24 : 15, N, N - 15));
   return dc.getImage();
 }
 const badge = top.addImage(lineBadge(LINE_LETTER, LINE_COLOR));
@@ -360,18 +415,18 @@ if (error) {
     body.layoutVertically();
     const nl = all.filter(x => isNorth(x.d));
     const sl = all.filter(x => !isNorth(x.d));
-    smallRow(body, "NORR", nl[0]);
+    smallRow(body, CFG.titles[0], nl[0]);
     body.addSpacer(5);
-    smallRow(body, "SÖDER", sl[0]);
+    smallRow(body, CFG.titles[1], sl[0]);
   } else {
     const colW = Math.floor((contentW - 9) / 2);
-    column(body, "NORR", all.filter(x => isNorth(x.d)), colW);
+    column(body, CFG.titles[0], all.filter(x => isNorth(x.d)), colW);
     body.addSpacer(4);
     const div = body.addStack();
     div.size = new Size(1, 20 + ROWS * 23);
     div.backgroundColor = new Color("#2c2c2e");
     body.addSpacer(4);
-    column(body, "SÖDER", all.filter(x => !isNorth(x.d)), colW);
+    column(body, CFG.titles[1], all.filter(x => !isNorth(x.d)), colW);
   }
 }
 content.addSpacer();

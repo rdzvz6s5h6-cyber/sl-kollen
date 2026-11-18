@@ -1,5 +1,5 @@
-// SL – pendeltåg, närmaste station (automatiskt)
-// Scriptable-widget (medium). Version 2026-11-18b: färgpiller, hero-rad, trafikläge i två rader.
+// SL-kollen – pendeltåg, närmaste station (automatiskt)
+// Scriptable-widget i tre storlekar: liten, medium och stor.
 const LITE = 6;        // minuter försenad => gul (6–10)
 const MYCKET = 11;     // minuter försenad => röd (över 10)
 const FAMILY = config.widgetFamily || "medium";
