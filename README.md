@@ -3,8 +3,12 @@
 Scriptable-widget för iPhone som visar SL pendeltåg från närmaste station: nästa tre tåg norrut och söderut, minuter kvar, färg för försening och trafikläget längst ner. Bara text, ingen karta.
 
 ## Filer
-- `SL-pendeltag.js` – själva widgeten. **Det här är filen du redigerar.**
+- `SL-pendeltag.js` – pendeltågs-widgeten. **Det här är filen du redigerar.**
 - `Laddare.js` – liten laddare som alla användare klistrar in i Scriptable en gång. Den hämtar `SL-pendeltag.js` härifrån varje gång widgeten körs och sparar en kopia för när nätet saknas. Ändras aldrig.
+- `SL-tunnelbana-roda.js` – tunnelbanans röda linje (13, 14), samma layout. Första version, ej testad på telefon.
+- `Laddare-tunnelbana.js` – laddare för tunnelbane-widgeten (egen cache, påverkar inte pendeln).
+
+Lägg båda widgetarna ovanpå varandra på hemskärmen (iOS-stack) för att swipa mellan dem.
 
 ## Installera (för dig eller en kompis)
 1. Installera appen Scriptable.
@@ -36,5 +40,13 @@ SL Transport API och SL Deviations API (öppna, ingen nyckel):
 - Inställda tåg upptäcks med en gissning på fältet `state`.
 - Grön text "Inga störningar" är inte sedd i praktiken än.
 
+## Tunnelbana (röda linjen) – ej verifierat
+- Station väljs bland röda linjens stationsnamn (lista i koden), annars de 20 närmaste platserna med röd avgång.
+- NORR = mot Ropsten/Mörby centrum, SÖDER = mot Norsborg/Fruängen (efter destinationsnamn).
+- Färggränser för försening är satta till gul 3–5 min, röd 6+ min (gissning, justera `LITE`/`MYCKET`).
+- Röda linjen filtreras på `line.group_of_lines` / `line.designation` (13, 14). Fältnamnen är inte provade mot riktig data.
+- Trafikläget filtreras på röda linjen via `scope.lines`; saknas den räknas störningen som relevant.
+
 ## Planerat
-- Egen widget för tunnelbana och en för buss.
+- Gröna och blå linjen (Farsta centrum ligger på gröna).
+- Egen widget för buss.
