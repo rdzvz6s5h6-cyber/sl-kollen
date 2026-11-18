@@ -307,6 +307,53 @@ if (error) {
   // Stor widget: två kolumner av rader skulle bli trångt, så en lista över hela bredden.
   shown.forEach((item, idx) => {
     const { d, i } = item;
+    const sp0 = d.stop_point || {};
+    const lage0 = String(sp0.designation || (d.stop && d.stop.designation) || d.stop_point_designation || "").trim();
+    if (SMALL) {
+      // liten widget: minuter till vänster, till höger linjenummer + läge och under dem slutstationen
+      const row = content.addStack();
+      row.centerAlignContent();
+      pill(row, i, true);
+      row.addSpacer(6);
+      const right = row.addStack();
+      right.layoutVertically();
+      const top2 = right.addStack();
+      top2.centerAlignContent();
+      const num0 = String((d.line && d.line.designation) || "");
+      const lb0 = top2.addStack();
+      lb0.backgroundColor = new Color(badgeColor(d));
+      lb0.cornerRadius = 6;
+      lb0.size = new Size(num0.length > 3 ? 46 : 38, 20);
+      lb0.centerAlignContent();
+      lb0.addSpacer();
+      const nt0 = lb0.addText(num0);
+      nt0.font = Font.boldSystemFont(12);
+      nt0.textColor = Color.white();
+      nt0.lineLimit = 1;
+      nt0.minimumScaleFactor = 0.7;
+      lb0.addSpacer();
+      if (lage0) {
+        top2.addSpacer(4);
+        const lg0 = top2.addStack();
+        lg0.backgroundColor = new Color("#2c2c2e");
+        lg0.cornerRadius = 6;
+        lg0.size = new Size(22, 20);
+        lg0.centerAlignContent();
+        lg0.addSpacer();
+        const lt0 = lg0.addText(lage0);
+        lt0.font = Font.mediumSystemFont(12);
+        lt0.textColor = Color.lightGray();
+        lt0.lineLimit = 1;
+        lg0.addSpacer();
+      }
+      const dest0 = right.addText(shortName(d.destination));
+      dest0.font = Font.mediumSystemFont(11);
+      dest0.textColor = Color.white();
+      dest0.lineLimit = 1;
+      dest0.minimumScaleFactor = 0.6;
+      content.addSpacer(4);
+      return;
+    }
     const big = idx === 0;
     const row = content.addStack();
     row.centerAlignContent();
