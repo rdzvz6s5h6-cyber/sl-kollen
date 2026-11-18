@@ -3,7 +3,7 @@
 const CONFIGS = {
   buss: {
     key: "buss", label: "bussarna", transports: ["BUS"], color: "#1E5AA8", letter: "B",
-    FORCE: "älvsjö", // TILLFÄLLIGT TEST: tvingar hållplatser vars namn börjar så. Ta bort raden när testet är klart.
+    FORCE: "årstaberg", // TILLFÄLLIGT TEST: tvingar hållplatser vars namn börjar så. Ta bort raden när testet är klart.
     stick: 0.15, // km: behåll senaste hållplats om du är närmare än så
     empty: "Inga bussavgångar hittades nära dig",
   },
