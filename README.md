@@ -15,6 +15,12 @@ Repon hette först `sl-pendeln` och heter nu **SL-kollen**. Adresserna i laddarn
 
 Lägg widgetarna ovanpå varandra på hemskärmen (iOS-stack) för att swipa mellan dem.
 
+## Färdiga skript att kopiera
+Mappen `kopiera/` har ett färdigt skript per linje. Öppna filen på GitHub, tryck på kopieringsknappen ("Copy raw file"), skapa ett nytt skript i Scriptable och klistra in. Inget behöver ändras.
+- `Pendeltag.js`
+- `Roda-linjen.js`, `Grona-linjen.js`, `Bla-linjen.js`
+- `Roslagsbanan.js`, `Tvarbanan.js`
+
 ## Installera (för dig eller en kompis)
 1. Installera appen Scriptable.
 2. Nytt skript, klistra in innehållet i `Laddare.js`.
