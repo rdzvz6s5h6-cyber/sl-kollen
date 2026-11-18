@@ -217,11 +217,15 @@ function splitTwo(text, max) {
   return l2 ? [l1, l2] : [l1];
 }
 
-// Bussar: blåbussar (stomlinjer) blå, övriga röda. Båtar: alltid båtfärgen.
+// Bussar: blåbussar (stomlinjer) blå, övriga röda. SL skickar ingen linjegrupp för bussar,
+// så blåbussarna listas här efter linjenummer (kontrollera listan om SL ändrar stomnätet).
+const BLUE_BUSES = ["1", "2", "3", "4", "5", "6", "172", "173", "175", "176", "177", "178", "179",
+  "471", "474", "670", "676", "677"];
 function badgeColor(d) {
   if (CFG.key !== "buss") return CFG.color;
-  const g = String((d.line && d.line.group_of_lines) || "");
-  return /blå/i.test(g) ? "#1E5AA8" : "#D32F2F";
+  const l = d.line || {};
+  const blue = /blå/i.test(String(l.group_of_lines || "")) || BLUE_BUSES.includes(String(l.designation));
+  return blue ? "#1E5AA8" : "#D32F2F";
 }
 
 const res = await resolve();
