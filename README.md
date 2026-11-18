@@ -24,6 +24,10 @@ Redigera `SL-pendeltag.js` här på GitHub. Alla får ändringen automatiskt, me
 - Testa i en egen fil (t.ex. `SL-pendeltag-test.js` med en egen laddare) innan du ändrar huvudfilen. Ett fel i huvudfilen slår ut alla användare.
 - Den som använder laddaren kör kod från den här repon. Dela den bara med folk du litar på.
 
+## Utseende
+- Färgad list överst och en rund bokstav före rubriken: röd med "T" för tunnelbanan (röda linjen), rosa med "P" för pendeln. Färgerna är gissade (`LINE_COLOR` överst i varje fil), inte hämtade ur SL:s grafiska profil.
+- Texten uppe till höger visar "Uppdaterat" med sekunder (HH:MM:SS).
+
 ## Färger (försening)
 - Grön: 0–5 min
 - Gul: 6–10 min

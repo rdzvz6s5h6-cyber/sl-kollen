@@ -222,13 +222,37 @@ if (!error && !deps) {
 const status = await statusP;
 const now = new Date(); // tidpunkten då informationen hämtades
 const stName = res.st ? res.st.name : "";
+const LINE_COLOR = "#EC619F"; // färg på listen och märket
+const LINE_LETTER = "P";
 
 const w = new ListWidget();
 w.backgroundColor = Color.black();
-w.setPadding(8, 12, 4, 12);
+w.setPadding(0, 0, 0, 0);
 
-const top = w.addStack();
+// Färgad list överst, över hela bredden
+const bar = w.addStack();
+bar.size = new Size(0, 5);
+bar.backgroundColor = new Color(LINE_COLOR);
+bar.addSpacer();
+
+const content = w.addStack();
+content.layoutVertically();
+content.setPadding(6, 12, 4, 12);
+
+const top = content.addStack();
 top.centerAlignContent();
+const badge = top.addStack();
+badge.size = new Size(20, 20);
+badge.cornerRadius = 10;
+badge.backgroundColor = new Color(LINE_COLOR);
+badge.centerAlignContent();
+badge.addSpacer();
+const bt = badge.addText(LINE_LETTER);
+bt.font = Font.boldSystemFont(12);
+bt.textColor = Color.white();
+bt.lineLimit = 1;
+badge.addSpacer();
+top.addSpacer(6);
 const t1 = top.addText(`Pendeltåg: ${stName}`);
 t1.font = Font.boldSystemFont(16);
 t1.textColor = Color.white();
@@ -237,7 +261,7 @@ t1.minimumScaleFactor = 0.7;
 top.addSpacer();
 const right = top.addStack();
 right.layoutVertically();
-const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 const t2 = right.addText(`Uppdaterat ${stamp}`);
 t2.font = Font.systemFont(10);
 t2.textColor = Color.gray();
@@ -248,10 +272,10 @@ if (res.note) {
   n.textColor = Color.gray();
   n.rightAlignText();
 }
-w.addSpacer(3);
+content.addSpacer(3);
 
 if (error) {
-  const e = w.addText(error);
+  const e = content.addText(error);
   e.font = Font.systemFont(13);
   e.textColor = Color.orange();
 } else {
@@ -260,7 +284,7 @@ if (error) {
     .filter(x => x.i.left >= -1)
     .sort((a, b) => a.i.exp - b.i.exp);
   const contentW = Device.screenSize().width - 55 - 24; // uppskattad innehållsbredd
-  const body = w.addStack();
+  const body = content.addStack();
   if (config.widgetFamily === "small") {
     column(body, "NORR", all.filter(x => x.d.direction_code === 2), contentW);
   } else {
@@ -274,13 +298,13 @@ if (error) {
     column(body, "SÖDER", all.filter(x => x.d.direction_code === 1), colW);
   }
 }
-w.addSpacer();
+content.addSpacer();
 
 const sColor = status.kind === "bad" ? new Color(PAL.y.bg)
   : status.kind === "ok" ? new Color(PAL.g.bg)
   : Color.gray();
 for (const line of splitTwo(status.text, LINE_MAX).slice(0, 2)) {
-  const row = w.addStack();
+  const row = content.addStack();
   row.addSpacer();
   const tx = row.addText(line);
   tx.font = Font.systemFont(10);
