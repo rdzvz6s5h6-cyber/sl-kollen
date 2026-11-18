@@ -6,7 +6,17 @@ Linjer: pendeltåg, tunnelbanans röda, gröna och blå linje, Roslagsbanan och 
 
 Exempel Pendeltåg:
 
-![Exempel Pendeltåg](bilder/pendeltag.jpg)
+**Liten**
+
+![Liten](bilder/pendeltag-liten.jpg)
+
+**Mellan**
+
+![Mellan](bilder/pendeltag-mellan.jpg)
+
+**Stor**
+
+![Stor](bilder/pendeltag-stor.jpg)
 
 ## Kom igång
 1. Installera appen **Scriptable** från App Store.
