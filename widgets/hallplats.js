@@ -283,20 +283,21 @@ if (error) {
     const row = content.addStack();
     row.centerAlignContent();
     pill(row, i, big);
-    row.addSpacer(5);
-    // linjenummer i en liten färgad ruta
+    row.addSpacer(big ? 5 : 11); // översta pillen är bredare; lika startpunkt för linjenumren
+    // linjenummer i en liten färgad ruta (fast bredd, siffrorna centrerade)
     const num = String((d.line && d.line.designation) || "");
+    const NW = num.length > 3 ? 52 : 44;
     const lb = row.addStack();
     lb.backgroundColor = new Color(CFG.color);
-    lb.cornerRadius = 5;
-    lb.setPadding(1, 4, 1, 4);
-    lb.size = new Size(num.length > 3 ? 44 : 36, 0);
+    lb.cornerRadius = 6;
+    lb.size = new Size(NW, SMALL ? 20 : 24);
     lb.centerAlignContent();
     lb.addSpacer();
     const nt = lb.addText(num);
-    nt.font = Font.boldSystemFont(SMALL ? 11 : 13);
+    nt.font = Font.boldSystemFont(SMALL ? 12 : 14);
     nt.textColor = Color.white();
     nt.lineLimit = 1;
+    nt.minimumScaleFactor = 0.7;
     lb.addSpacer();
     row.addSpacer(5);
     const dest = row.addText(shortName(d.destination));
