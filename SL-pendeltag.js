@@ -2,7 +2,9 @@
 // Scriptable-widget (medium). Version 2026-11-18b: färgpiller, hero-rad, trafikläge i två rader.
 const LITE = 6;        // minuter försenad => gul (6–10)
 const MYCKET = 11;     // minuter försenad => röd (över 10)
-const ROWS = 3;
+const FAMILY = config.widgetFamily || "medium";
+const SMALL = FAMILY === "small";
+const ROWS = FAMILY === "large" ? 6 : 3; // stor widget visar fler avgångar per håll
 const CANDIDATES = 20;
 const LINE_MAX = 50;   // tecken per rad i trafikläget
 const BASE = "https://transport.integration.sl.se/v1";
@@ -225,6 +227,28 @@ const stName = res.st ? res.st.name : "";
 const LINE_COLOR = "#EC619F"; // färg på listen och märket
 const LINE_LETTER = "P";
 
+// Liten widget: bara nästa avgång per håll
+function smallRow(parent, title, item) {
+  const h = parent.addText(title);
+  h.font = Font.boldSystemFont(9);
+  h.textColor = Color.gray();
+  if (!item) {
+    const t = parent.addText("–");
+    t.font = Font.systemFont(18);
+    t.textColor = Color.gray();
+    return;
+  }
+  const row = parent.addStack();
+  row.centerAlignContent();
+  pill(row, item.i, true);
+  row.addSpacer(5);
+  const dest = row.addText(shortName(item.d.destination));
+  dest.font = Font.boldSystemFont(13);
+  dest.textColor = Color.white();
+  dest.lineLimit = 1;
+  dest.minimumScaleFactor = 0.6;
+}
+
 const w = new ListWidget();
 w.backgroundColor = Color.black();
 w.setPadding(0, 0, 0, 0);
@@ -237,7 +261,7 @@ bar.addSpacer();
 
 const content = w.addStack();
 content.layoutVertically();
-content.setPadding(6, 12, 4, 12);
+content.setPadding(6, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
 
 const top = content.addStack();
 top.centerAlignContent();
@@ -260,23 +284,25 @@ const badge = top.addImage(lineBadge(LINE_LETTER, LINE_COLOR));
 badge.imageSize = new Size(24, 24);
 top.addSpacer(6);
 const t1 = top.addText(stName);
-t1.font = Font.boldSystemFont(16);
+t1.font = Font.boldSystemFont(SMALL ? 15 : 16);
 t1.textColor = Color.white();
 t1.lineLimit = 1;
 t1.minimumScaleFactor = 0.7;
-top.addSpacer();
-const right = top.addStack();
-right.layoutVertically();
 const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-const t2 = right.addText(`Uppdaterat ${stamp}`);
-t2.font = Font.systemFont(10);
-t2.textColor = Color.gray();
-t2.rightAlignText();
-if (res.note) {
-  const n = right.addText(res.note);
-  n.font = Font.systemFont(9);
-  n.textColor = Color.gray();
-  n.rightAlignText();
+if (!SMALL) {
+  top.addSpacer();
+  const right = top.addStack();
+  right.layoutVertically();
+  const t2 = right.addText(`Uppdaterat ${stamp}`);
+  t2.font = Font.systemFont(10);
+  t2.textColor = Color.gray();
+  t2.rightAlignText();
+  if (res.note) {
+    const n = right.addText(res.note);
+    n.font = Font.systemFont(9);
+    n.textColor = Color.gray();
+    n.rightAlignText();
+  }
 }
 content.addSpacer(3);
 
@@ -291,14 +317,19 @@ if (error) {
     .sort((a, b) => a.i.exp - b.i.exp);
   const contentW = Device.screenSize().width - 55 - 24; // uppskattad innehållsbredd
   const body = content.addStack();
-  if (config.widgetFamily === "small") {
-    column(body, "NORR", all.filter(x => x.d.direction_code === 2), contentW);
+  if (SMALL) {
+    body.layoutVertically();
+    const nl = all.filter(x => x.d.direction_code === 2);
+    const sl = all.filter(x => x.d.direction_code === 1);
+    smallRow(body, "NORR", nl[0]);
+    body.addSpacer(5);
+    smallRow(body, "SÖDER", sl[0]);
   } else {
     const colW = Math.floor((contentW - 9) / 2);
     column(body, "NORR", all.filter(x => x.d.direction_code === 2), colW);
     body.addSpacer(4);
     const div = body.addStack();
-    div.size = new Size(1, 90);
+    div.size = new Size(1, 20 + ROWS * 23);
     div.backgroundColor = new Color("#2c2c2e");
     body.addSpacer(4);
     column(body, "SÖDER", all.filter(x => x.d.direction_code === 1), colW);
@@ -309,7 +340,16 @@ content.addSpacer();
 const sColor = status.kind === "bad" ? new Color(PAL.y.bg)
   : status.kind === "ok" ? new Color(PAL.g.bg)
   : Color.gray();
-for (const line of splitTwo(status.text, LINE_MAX).slice(0, 2)) {
+if (SMALL) {
+  const srow = content.addStack();
+  srow.addSpacer();
+  const st = srow.addText(status.kind === "bad" ? "Störning" : stamp);
+  st.font = Font.systemFont(10);
+  st.textColor = status.kind === "bad" ? new Color(PAL.y.bg) : Color.gray();
+  st.lineLimit = 1;
+  srow.addSpacer();
+}
+for (const line of (SMALL ? [] : splitTwo(status.text, LINE_MAX).slice(0, 2))) {
   const row = content.addStack();
   row.addSpacer();
   const tx = row.addText(line);

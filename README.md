@@ -44,6 +44,13 @@ Redigera `SL-pendeltag.js` här på GitHub. Alla får ändringen automatiskt, me
 - Färgad list överst och en rund bokstav före rubriken: röd med "T" för tunnelbanan (röda linjen), rosa med "P" för pendeln. Färgerna är gissade (`LINE_COLOR` överst i varje fil), inte hämtade ur SL:s grafiska profil.
 - Texten uppe till höger visar "Uppdaterat" med sekunder (HH:MM:SS).
 
+## Storlekar
+Widgeten anpassar sig efter vilken storlek du väljer på hemskärmen (håll in widgeten, välj storlek):
+- **Liten (2x2):** stationsnamn, och bara nästa avgång per håll. Visar "Störning" i gult om trafikläget har en, annars klockslaget.
+- **Medium:** som tidigare, tre avgångar per håll och trafikläge.
+- **Stor (4x4):** upp till sex avgångar per håll (om SL levererar så många), samma layout i övrigt.
+Storlekarna är nya och inte provade på telefonen. Att köra skriptet inuti Scriptable visar alltid mediumvarianten.
+
 ## Färger (försening)
 - Grön: 0–5 min
 - Gul: 6–10 min
