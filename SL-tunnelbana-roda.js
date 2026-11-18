@@ -284,7 +284,7 @@ const badge = top.addStack();
 badge.size = new Size(24, 24);
 badge.cornerRadius = 12;
 badge.backgroundColor = new Color(LINE_COLOR);
-badge.setPadding(0, 8, 0, 0);
+badge.setPadding(0, 6, 0, 0);
 badge.centerAlignContent();
 const bt = badge.addText(LINE_LETTER);
 bt.font = Font.boldSystemFont(13);
