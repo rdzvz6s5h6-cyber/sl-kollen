@@ -1,5 +1,5 @@
 // SL-kollen – en widget för flera linjer. Vilken linje styrs av laddaren (SL_LINJE):
-// roda, gron, bla (tunnelbana), roslagsbanan, tvarbanan, lidingobanan, nockebybanan, saltsjobanan.
+// roda, gron, bla (tunnelbana), roslagsbanan, tvarbanan, lidingobanan, nockebybanan, saltsjobanan, sparvagcity, gul.
 // Alla linjer är provade mot riktig data.
 const LITE = 3;        // minuter försenad => gul (3–5)  (obekräftad gräns)
 const MYCKET = 6;      // minuter försenad => röd (6 eller mer)
@@ -85,6 +85,20 @@ const CONFIGS = {
     names: ["slussen", "henriksdal", "sickla", "saltsjö-järla", "järla", "fisksätra", "neglinge",
       "saltsjö-duvnäs", "östervik", "saltsjöbaden", "storängen", "lillängen", "igelboda", "tippen",
       "erstavik", "skuru", "solsidan", "dalénum"],
+  },
+  gul: {
+    key: "gul", label: "gula linjen", transport: "METRO", strict: true,
+    group: /gul/i, nums: [], color: "#F5B800", letterColor: "#1A1A1A", letter: "T",
+    titles: ["NORR", "SÖDER"], north: /fridhemsplan/i, south: /älvsjö/i,
+    notOpen: "Gula linjen (Fridhemsplan–Älvsjö) har inte öppnat än. Widgeten börjar fungera av sig själv när SL visar avgångar.",
+    names: ["fridhemsplan", "liljeholmen", "årstaberg", "årstafältet", "östbergahöjden", "älvsjö"],
+  },
+  sparvagcity: {
+    key: "sparvagcity", label: "Spårväg City", transport: "TRAM", strict: true,
+    group: /spårväg city|djurgård|city/i, nums: ["7", "7N"], color: "#6FA33A", letter: "7",
+    titles: ["ÖSTER", "VÄSTER"], north: /waldemarsudde|bellmansro|djurgård|skansen|gröna lund/i, south: /t-centralen|sergels|centralen/i,
+    names: ["t-centralen", "hamngatan", "nybroplan", "djurgårdsbron", "nordiska museet", "gröna lund",
+      "skansen", "liljevalchs", "djurgården", "waldemarsudde", "bellmansro", "norrmalmstorg"],
   },
 };
 const CFG = CONFIGS[typeof SL_LINJE !== "undefined" ? SL_LINJE : "roda"] || CONFIGS.roda;
@@ -240,7 +254,7 @@ async function resolve() {
     }
   }
   if (last) return { st: last, note: "senaste plats" };
-  return { error: `Ingen station för ${CFG.label} hittades` };
+  return { error: CFG.notOpen || `Ingen station för ${CFG.label} hittades` };
 }
 
 function info(d, now) {
@@ -398,7 +412,7 @@ function lineBadge(letter, color) {
   dc.respectScreenScale = false;
   dc.setFillColor(new Color(color));
   dc.fillEllipse(new Rect(0, 0, N, N));
-  dc.setTextColor(Color.white());
+  dc.setTextColor(CFG.letterColor ? new Color(CFG.letterColor) : Color.white());
   dc.setFont(Font.boldSystemFont(letter.length > 1 ? 40 : 54));
   dc.setTextAlignedCenter();
   dc.drawTextInRect(letter, new Rect(0, letter.length > 1 ? 24 : 15, N, N - 15));
