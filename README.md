@@ -54,7 +54,7 @@ Att köra skriptet inuti Scriptable visar alltid mediumvarianten.
 - Roslagsbanan: NORR/SÖDER. Tvärbanan och Nockebybanan: VÄSTER/ÖSTER. Lidingöbanan och Saltsjöbanan: ÖSTER/VÄSTER.
 
 ## Begränsningar
-- Provat mot riktig data: pendeltåg, röda och blå linjen. Gröna linjen, Roslagsbanan, Tvärbanan, Lidingöbanan, Nockebybanan och Saltsjöbanan är inte fullt provade, och färgerna och linjenumren för dem är antaganden.
+- Provat mot riktig data: pendeltåg, röda och blå linjen. Lidingöbanan, Nockebybanan och Saltsjöbanan är provade i alla storlekar. Gröna linjen, Roslagsbanan och Tvärbanan är inte fullt provade, och färgerna och linjenumren för dem är antaganden.
 - Riktningen på pendeln är kontrollerad vid Älvsjö.
 - Stationslistorna för tunnelbana, Roslagsbanan och Tvärbanan är ofullständiga. Hittas ingen station på linjen används de 20 närmaste platserna, så långt från linjen kan det bli "Ingen station hittades".
 - Störningar för Roslagsbanan och spårvägarna räknas bara om meddelandet pekar ut linjen.
