@@ -1,7 +1,7 @@
 // SL-kollen – pendeltåg, närmaste station (automatiskt)
 // Scriptable-widget i tre storlekar: liten, medium och stor.
-const LITE = 6;        // minuter försenad => gul (6–10)
-const MYCKET = 11;     // minuter försenad => röd (över 10)
+const LITE = 3;        // minuter försenad => gul (6–10)
+const MYCKET = 6;     // minuter försenad => röd (över 10)
 const FAMILY = config.widgetFamily || "medium";
 const SMALL = FAMILY === "small";
 const ROWS = FAMILY === "large" ? 6 : 3; // stor widget visar fler avgångar per håll
