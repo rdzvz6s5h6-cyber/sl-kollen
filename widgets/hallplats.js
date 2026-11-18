@@ -314,7 +314,7 @@ if (error) {
     row.addSpacer(big ? 5 : 11); // översta pillen är bredare; lika startpunkt för linjenumren
     // linjenummer i en liten färgad ruta (fast bredd, siffrorna centrerade)
     const num = String((d.line && d.line.designation) || "");
-    const NW = num.length > 3 ? 52 : 44;
+    const NW = SMALL ? 38 : (num.length > 3 ? 52 : 44);
     const lb = row.addStack();
     lb.backgroundColor = new Color(badgeColor(d));
     lb.cornerRadius = 6;
@@ -327,25 +327,48 @@ if (error) {
     nt.lineLimit = 1;
     nt.minimumScaleFactor = 0.7;
     lb.addSpacer();
-    row.addSpacer(5);
-    const dest = row.addText(shortName(d.destination));
-    dest.font = big ? Font.boldSystemFont(SMALL ? 13 : 16) : Font.mediumSystemFont(SMALL ? 12 : 15);
-    dest.textColor = Color.white();
-    dest.lineLimit = 1;
-    dest.minimumScaleFactor = 0.6;
-    // hållplatsläge (stolpen/"busskuren"), t.ex. A, B, C
     const sp = d.stop_point || {};
     const lage = String(sp.designation || (d.stop && d.stop.designation) || d.stop_point_designation || "").trim();
-    if (lage) {
+    const destFont = big ? Font.boldSystemFont(16) : Font.mediumSystemFont(15);
+    if (SMALL) {
+      // liten widget: ingen plats bredvid, så slutstationen står under raden och läget är en bokstav
       row.addSpacer();
-      const lg = row.addStack();
-      lg.backgroundColor = new Color("#2c2c2e");
-      lg.cornerRadius = 6;
-      lg.setPadding(2, 6, 2, 6);
-      const lt = lg.addText(SMALL ? lage : `Läge ${lage}`);
-      lt.font = Font.mediumSystemFont(SMALL ? 10 : 12);
-      lt.textColor = Color.lightGray();
-      lt.lineLimit = 1;
+      if (lage) {
+        const lg = row.addStack();
+        lg.backgroundColor = new Color("#2c2c2e");
+        lg.cornerRadius = 6;
+        lg.size = new Size(22, 20);
+        lg.centerAlignContent();
+        lg.addSpacer();
+        const lt = lg.addText(lage);
+        lt.font = Font.mediumSystemFont(12);
+        lt.textColor = Color.lightGray();
+        lt.lineLimit = 1;
+        lg.addSpacer();
+      }
+      const dest = content.addText(shortName(d.destination));
+      dest.font = Font.mediumSystemFont(11);
+      dest.textColor = Color.lightGray();
+      dest.lineLimit = 1;
+      dest.minimumScaleFactor = 0.7;
+    } else {
+      row.addSpacer(5);
+      const dest = row.addText(shortName(d.destination));
+      dest.font = destFont;
+      dest.textColor = Color.white();
+      dest.lineLimit = 1;
+      dest.minimumScaleFactor = 0.6;
+      if (lage) {
+        row.addSpacer();
+        const lg = row.addStack();
+        lg.backgroundColor = new Color("#2c2c2e");
+        lg.cornerRadius = 6;
+        lg.setPadding(2, 6, 2, 6);
+        const lt = lg.addText(`Läge ${lage}`);
+        lt.font = Font.mediumSystemFont(12);
+        lt.textColor = Color.lightGray();
+        lt.lineLimit = 1;
+      }
     }
     content.addSpacer(3);
   });
@@ -382,7 +405,7 @@ if (status) {
   }
 }
 
-if (CFG.FORCE) {
+if (CFG.FORCE && !SMALL) {
   const first = shown[0] && shown[0].d;
   const lines = [
     "TEST: " + (FDBG.join(", ") || "-"),
