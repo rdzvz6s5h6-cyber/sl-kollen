@@ -1,5 +1,5 @@
 // SL-kollen – en widget för flera linjer. Vilken linje styrs av laddaren (SL_LINJE):
-// roda, gron, bla (tunnelbana), roslagsbanan, tvarbanan.
+// roda, gron, bla (tunnelbana), roslagsbanan, tvarbanan, lidingobanan, nockebybanan, saltsjobanan.
 // Provat mot riktig data: röda och blå linjen. Övriga linjer är ej provade.
 const LITE = 3;        // minuter försenad => gul (3–5)  (obekräftad gräns)
 const MYCKET = 6;      // minuter försenad => röd (6 eller mer)
@@ -55,13 +55,36 @@ const CONFIGS = {
   },
   tvarbanan: {
     key: "tvarbanan", label: "Tvärbanan", transport: "TRAM", strict: true,
-    group: /tvär/i, nums: ["30", "31"], color: "#E8822B", letter: "Tv",
+    group: /tvär/i, nums: ["22"], color: "#E8822B", letter: "Tv",
     titles: ["VÄSTER", "ÖSTER"], north: /alvik|solna/i, south: /sickla|gullmarsplan|liljeholmen/i,
     names: ["alvik", "stora essingen", "gröndal", "årsta", "lindhagensplan", "liljeholmen",
       "årstadal", "årstaberg", "årstaberg", "johannesfred", "sofia", "hammarby", "sickla",
       "sickla kaj", "sickla udde", "gullmarsplan", "solna station", "solna business park",
       "ulvsunda", "bromsten", "mariehäll", "hägersten", "kungsholmen", "ropsten", "lövholmen",
       "trekanten", "luma", "aspudden", "norra hammarbyhamnen", "globen", "sicklas"],
+  },
+  lidingobanan: {
+    key: "lidingobanan", label: "Lidingöbanan", transport: "TRAM", strict: true,
+    group: /liding/i, nums: ["21"], color: "#A5682A", letter: "L",
+    titles: ["ÖSTER", "VÄSTER"], north: /gåshaga|lidingö|larsberg|baggeby/i, south: /ropsten/i,
+    names: ["ropsten", "torsvik", "bodal", "larsberg", "baggeby", "gåshaga brygga", "gåshaga",
+      "kottla", "elfviksvägen", "bosund", "käppala", "lidingö centrum", "dalénum", "högberga"],
+  },
+  nockebybanan: {
+    key: "nockebybanan", label: "Nockebybanan", transport: "TRAM", strict: true,
+    group: /nockeby/i, nums: ["12"], color: "#7A5C3E", letter: "N",
+    titles: ["VÄSTER", "ÖSTER"], north: /nockeby|smedslätten|bromma/i, south: /alvik/i,
+    names: ["alvik", "ålstensgatan", "höglandstorget", "ålsten", "kyrkbacken", "smedslätten",
+      "gröndal", "nockeby torg", "nockeby", "tranebergs strand", "bromma kyrka", "johannesdal",
+      "brommaplan", "ålstens gård", "ålstensbron"],
+  },
+  saltsjobanan: {
+    key: "saltsjobanan", label: "Saltsjöbanan", transport: "TRAM", strict: true,
+    group: /saltsj/i, nums: ["25", "26"], color: "#1FA3A3", letter: "S",
+    titles: ["ÖSTER", "VÄSTER"], north: /saltsjöbaden|solsidan|igelboda|neglinge|fisksätra/i, south: /slussen|henriksdal|sickla/i,
+    names: ["slussen", "henriksdal", "sickla", "saltsjö-järla", "järla", "fisksätra", "neglinge",
+      "saltsjö-duvnäs", "östervik", "saltsjöbaden", "storängen", "lillängen", "igelboda", "tippen",
+      "erstavik", "skuru", "solsidan", "dalénum"],
   },
 };
 const CFG = CONFIGS[typeof SL_LINJE !== "undefined" ? SL_LINJE : "roda"] || CONFIGS.roda;
