@@ -18,7 +18,9 @@ const LITE = 3;
 const MYCKET = 6;
 const FAMILY = config.widgetFamily || "medium";
 const SMALL = FAMILY === "small";
-const ROWS = SMALL ? 2 : FAMILY === "large" ? 8 : 3;
+const LARGE = FAMILY === "large";
+const ROWS = SMALL ? 2 : LARGE ? 10 : 3;
+const MAX_FULL = 3; // stor widget: så många störningar visas i sin helhet
 const CANDIDATES = 15;
 const LINE_MAX = 50;
 const BASE = "https://transport.integration.sl.se/v1";
@@ -100,12 +102,18 @@ async function loadStatus(lines) {
       const sc = (m.scope && m.scope.lines) || [];
       return sc.some(l => lines.includes(String(l.designation)));
     });
-    if (mine.length === 0) return { text: `Inga störningar noterade för ${CFG.label} här`, kind: "ok" };
-    const v = mine[0].message_variants || [];
-    const sv = v.find(x => x.language === "sv") || v[0] || {};
-    let t = String(sv.header || sv.details || "Störning").replace(/\s+/g, " ").trim();
-    if (mine.length > 1) t += `\u00A0(+${mine.length - 1}\u00A0till)`;
-    return { text: t, kind: "bad" };
+    if (mine.length === 0) return { text: `Inga störningar noterade för ${CFG.label} här`, kind: "ok", items: [] };
+    const clean = t => String(t || "").replace(/\s+/g, " ").trim();
+    const items = mine.map(m => {
+      const v = m.message_variants || [];
+      const sv = v.find(x => x.language === "sv") || v[0] || {};
+      const head = clean(sv.header), det = clean(sv.details);
+      const full = head && det && !det.startsWith(head) ? `${head}: ${det}` : (det || head || "Störning");
+      return { short: head || full, full: full.length > 170 ? full.slice(0, 167) + "…" : full };
+    });
+    let t = items[0].short;
+    if (items.length > 1) t += `\u00A0(+${items.length - 1}\u00A0till)`;
+    return { text: t, kind: "bad", items };
   } catch (e) { return fail; }
 }
 
@@ -241,8 +249,11 @@ const all = error ? [] : deps
   .map(d => ({ d, i: info(d, now) }))
   .filter(x => x.i.left >= -1)
   .sort((a, b) => a.i.exp - b.i.exp);
-const shown = all.slice(0, ROWS);
+let shown = all.slice(0, ROWS);
 const status = error ? null : await loadStatus([...new Set(shown.map(x => String(x.d.line && x.d.line.designation)))]);
+// Stor widget: störningar går före avgångar. Varje störning som visas helt tar ca två rader.
+const fullN = LARGE && status && status.kind === "bad" ? Math.min(status.items.length, MAX_FULL) : 0;
+if (fullN) shown = shown.slice(0, Math.max(3, ROWS - 2 * fullN));
 
 const w = new ListWidget();
 w.backgroundColor = Color.black();
@@ -438,6 +449,20 @@ if (status) {
     st.textColor = status.kind === "bad" ? new Color(PAL.y.bg) : Color.gray();
     st.lineLimit = 1;
     srow.addSpacer();
+  } else if (fullN) {
+    content.addSpacer(2);
+    status.items.slice(0, fullN).forEach(it => {
+      const tx = content.addText(it.full);
+      tx.font = Font.systemFont(10);
+      tx.textColor = sColor;
+      tx.lineLimit = 3;
+      content.addSpacer(3);
+    });
+    if (status.items.length > fullN) {
+      const more = content.addText(`+${status.items.length - fullN}\u00A0till`);
+      more.font = Font.systemFont(10);
+      more.textColor = sColor;
+    }
   } else {
     for (const line of splitTwo(status.text, LINE_MAX).slice(0, 2)) {
       const row = content.addStack();
