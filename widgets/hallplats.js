@@ -3,6 +3,7 @@
 const CONFIGS = {
   buss: {
     key: "buss", label: "bussarna", transports: ["BUS"], color: "#1E5AA8", letter: "B",
+    FORCE: "älvsjö", // TILLFÄLLIGT TEST: tvingar hållplatser vars namn börjar så. Ta bort raden när testet är klart.
     stick: 0.15, // km: behåll senaste hållplats om du är närmare än så
     empty: "Inga bussavgångar hittades nära dig",
   },
@@ -108,6 +109,7 @@ async function loadStatus(lines) {
   } catch (e) { return fail; }
 }
 
+const norm = s => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
 async function resolve() {
   let loc = null;
   try { Location.setAccuracyToHundredMeters(); loc = await Location.current(); } catch (e) {}
@@ -116,7 +118,7 @@ async function resolve() {
     if (last) return { st: last, note: "senaste plats" };
     return { error: "Plats saknas. Kör skriptet i appen." };
   }
-  if (last && last.lat !== undefined &&
+  if (!CFG.FORCE && last && last.lat !== undefined &&
       km(loc.latitude, loc.longitude, last.lat, last.lon) < CFG.stick) {
     return { st: last, note: "" };
   }
@@ -124,6 +126,16 @@ async function resolve() {
   if (!sites) {
     if (last) return { st: last, note: "senaste plats" };
     return { error: "Kör skriptet i appen en gång" };
+  }
+  if (CFG.FORCE) {
+    const forced = sites.filter(s => norm(s[1]).startsWith(CFG.FORCE)).slice(0, 8);
+    const fr = await Promise.all(forced.map(s => fetchDeps(s[0])));
+    for (let i = 0; i < forced.length; i++) {
+      if (fr[i] && fr[i].length) {
+        const s = forced[i];
+        return { st: { id: s[0], name: s[1], lat: s[2], lon: s[3] }, deps: fr[i], note: "testläge" };
+      }
+    }
   }
   const near = sites
     .map(s => ({ s, d: km(loc.latitude, loc.longitude, s[2], s[3]) }))
