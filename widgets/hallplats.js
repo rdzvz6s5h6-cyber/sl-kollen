@@ -129,7 +129,9 @@ async function resolve() {
     return { error: "Kör skriptet i appen en gång" };
   }
   if (CFG.FORCE) {
-    const forced = sites.filter(s => norm(s[1]).startsWith(CFG.FORCE)).slice(0, 8);
+    const forced = sites.filter(s => norm(s[1]).startsWith(CFG.FORCE))
+      .sort((a, b) => (/station/.test(norm(a[1])) ? 0 : 1) - (/station/.test(norm(b[1])) ? 0 : 1))
+      .slice(0, 8);
     const fr = await Promise.all(forced.map(s => fetchDeps(s[0])));
     forced.forEach((s, i) => FDBG.push(`${s[1]}:${fr[i] ? fr[i].length : "x"}`));
     if (!forced.length) FDBG.push("inga platser börjar på " + CFG.FORCE);
