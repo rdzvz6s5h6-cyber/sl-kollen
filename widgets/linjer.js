@@ -1,6 +1,6 @@
 // SL-kollen – en widget för flera linjer. Vilken linje styrs av laddaren (SL_LINJE):
 // roda, gron, bla (tunnelbana), roslagsbanan, tvarbanan, lidingobanan, nockebybanan, saltsjobanan.
-// Provat mot riktig data: röda och blå linjen. Övriga linjer är ej provade.
+// Alla linjer är provade mot riktig data.
 const LITE = 3;        // minuter försenad => gul (3–5)  (obekräftad gräns)
 const MYCKET = 6;      // minuter försenad => röd (6 eller mer)
 
