@@ -241,16 +241,23 @@ content.setPadding(6, 12, 4, 12);
 
 const top = content.addStack();
 top.centerAlignContent();
-const badge = top.addStack();
-badge.size = new Size(24, 24);
-badge.cornerRadius = 12;
-badge.backgroundColor = new Color(LINE_COLOR);
-badge.setPadding(0, 6, 0, 0);
-badge.centerAlignContent();
-const bt = badge.addText(LINE_LETTER);
-bt.font = Font.boldSystemFont(13);
-bt.textColor = Color.white();
-bt.lineLimit = 1;
+// Märket ritas som en bild så att bokstaven hamnar exakt i mitten
+function lineBadge(letter, color) {
+  const N = 96;
+  const dc = new DrawContext();
+  dc.size = new Size(N, N);
+  dc.opaque = false;
+  dc.respectScreenScale = false;
+  dc.setFillColor(new Color(color));
+  dc.fillEllipse(new Rect(0, 0, N, N));
+  dc.setTextColor(Color.white());
+  dc.setFont(Font.boldSystemFont(54));
+  dc.setTextAlignedCenter();
+  dc.drawTextInRect(letter, new Rect(0, 15, N, N - 15));
+  return dc.getImage();
+}
+const badge = top.addImage(lineBadge(LINE_LETTER, LINE_COLOR));
+badge.imageSize = new Size(24, 24);
 top.addSpacer(6);
 const t1 = top.addText(`Pendeltåg: ${stName}`);
 t1.font = Font.boldSystemFont(16);
