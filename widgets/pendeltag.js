@@ -4,7 +4,7 @@ const LITE = 6;        // minuter försenad => gul (6–10)
 const MYCKET = 11;     // minuter försenad => röd (över 10)
 const FAMILY = config.widgetFamily || "medium";
 const SMALL = FAMILY === "small";
-const ROWS = FAMILY === "large" ? 10 : 3; // stor widget visar fler avgångar per håll
+const ROWS = FAMILY === "large" ? 6 : 3; // stor widget visar fler avgångar per håll
 const CANDIDATES = 20;
 const LINE_MAX = 50;   // tecken per rad i trafikläget
 const BASE = "https://transport.integration.sl.se/v1";
