@@ -1,5 +1,5 @@
 // SL – pendeltåg, närmaste station (automatiskt)
-// Scriptable-widget (medium). Version 2026-11-18: färgpiller, hero-rad, trafikläge i två rader.
+// Scriptable-widget (medium). Version 2026-11-18b: färgpiller, hero-rad, trafikläge i två rader.
 const LITE = 6;        // minuter försenad => gul (6–10)
 const MYCKET = 11;     // minuter försenad => röd (över 10)
 const ROWS = 3;
@@ -238,7 +238,7 @@ top.addSpacer();
 const right = top.addStack();
 right.layoutVertically();
 const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
-const t2 = right.addText(`Hämtat ${stamp}`);
+const t2 = right.addText(`Uppdaterat ${stamp}`);
 t2.font = Font.systemFont(10);
 t2.textColor = Color.gray();
 t2.rightAlignText();
