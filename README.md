@@ -1,68 +1,30 @@
 # SL-kollen
 
-Scriptable-widgets för iPhone som visar SL-trafik från närmaste station: nästa avgångar åt varje håll, minuter kvar, färg för försening och trafikläget längst ner. Bara text, ingen karta.
-
-Linjer: pendeltåg, tunnelbanans röda, gröna och blå linje, Roslagsbanan, Tvärbanan, Lidingöbanan, Nockebybanan och Saltsjöbanan.
-
-Exempel Pendeltåg:
-
-**Liten**
+Widgets för iPhone som visar nästa avgångar från din närmaste SL-station: minuter kvar, färg för försening och trafikläget. Bara text.
 
 ![Liten](bilder/pendeltag-liten.jpg)
-
-**Mellan**
-
 ![Mellan](bilder/pendeltag-mellan.jpg)
-
-**Stor**
-
 ![Stor](bilder/pendeltag-stor.jpg)
+
+Storlekar: liten, mellan och stor.
+
+## Linjer
+Pendeltåg, tunnelbanans röda, gröna och blå linje, Roslagsbanan, Tvärbanan, Lidingöbanan, Nockebybanan och Saltsjöbanan.
 
 ## Kom igång
 1. Installera appen **Scriptable** från App Store.
-2. Öppna mappen `kopiera/` här på GitHub, välj linjen du vill ha och tryck på **Copy raw file** (kopieringsikonen uppe till höger).
-3. Skapa ett nytt skript i Scriptable, klistra in och kör det **i appen** en gång. Tillåt platsåtkomst (helst "Alltid") och se till att du har nät.
+2. Öppna mappen `kopiera/` här på GitHub, välj din linje och tryck på **Copy raw file**.
+3. Skapa ett nytt skript i Scriptable, klistra in och kör det en gång i appen. Tillåt platsåtkomst (helst "Alltid").
 4. Lägg till en Scriptable-widget på hemskärmen, håll in den, välj **Redigera widget** och välj skriptet.
 
-Vill du ha flera linjer gör du ett eget skript per linje. De kan läggas ovanpå varandra som en iOS-stack så att du kan swipa mellan dem.
+Vill du ha flera linjer gör du ett skript per linje. Lägg widgetarna i en iOS-stack så kan du swipa mellan dem.
 
-## Filer
-- `kopiera/` – färdiga skript att klistra in i Scriptable: `Pendeltag.js`, `Roda-linjen.js`, `Grona-linjen.js`, `Bla-linjen.js`, `Roslagsbanan.js`, `Tvarbanan.js`, `Lidingobanan.js`, `Nockebybanan.js`, `Saltsjobanan.js`. Varje skript hämtar sin widget härifrån varje gång den körs och sparar en kopia för när nätet saknas.
-- `widgets/pendeltag.js` – pendeltågswidgeten.
-- `widgets/linjer.js` – widgeten för tunnelbanan, Roslagsbanan och spårvägarna. Vilken linje som visas styrs av raden `LINJE` i skriptet.
-- `bilder/` – förhandsbilder.
-
-Ändringar görs i `widgets/`. Alla som klistrat in ett skript får ändringen automatiskt, men GitHub cachar filerna i ca 5 minuter.
-
-## Utseende
-- Färgad list överst och ett rundat märke med linjens bokstav före stationsnamnet. Uppe till höger står "Uppdaterat" med klockslag och sekunder.
+## Så läser du widgeten
 - Pillerna visar minuter kvar. Grön är i tid, gul är försenad och röd är mycket försenad eller inställd.
-- Försening, tunnelbana: gul från 3 min, röd från 6 min. Pendeltåg: gul från 6 min, röd från 11 min.
-- Trafikläget står längst ner. Grön text betyder inga störningar, gul är en störning. På tunnelbanan hoppas meddelanden om entréer, hissar och trappor över.
+- Längst ner står trafikläget. Grön text betyder inga störningar, gul är en störning.
+- Stationen väljs automatiskt utifrån din plats.
 
-## Storlekar
-Widgeten anpassar sig efter storleken du väljer på hemskärmen:
-- **Liten:** stationsnamn och nästa avgång åt varje håll. Visar "Störning" i gult om det finns en, annars klockslaget.
-- **Medium:** tre avgångar åt varje håll och trafikläge.
-- **Stor:** upp till sex avgångar åt varje håll (om SL levererar så många).
+## Uppdateringar
+Skripten hämtar sin kod härifrån varje gång de körs, så du får ändringar automatiskt (GitHub fördröjer ca 5 minuter). Det betyder också att du kör kod från den här repon, så dela den bara med folk du litar på.
 
-Att köra skriptet inuti Scriptable visar alltid mediumvarianten.
-
-## Linjer och stationer
-- Stationen väljs automatiskt utifrån din plats. Saknas plats visas senast använda station.
-- Tunnelbana: norr är mot Ropsten, Mörby centrum, Akalla, Hjulsta, Åkeshov, Alvik och Hässelby strand. Söder är mot de övriga ändstationerna.
-- Roslagsbanan: NORR/SÖDER. Tvärbanan och Nockebybanan: VÄSTER/ÖSTER. Lidingöbanan och Saltsjöbanan: ÖSTER/VÄSTER.
-
-## Begränsningar
-- Alla linjer är provade mot riktig data i alla tre storlekarna. Färgerna är gissningar, inte hämtade från SL:s profil.
-- Riktningen på pendeln är kontrollerad vid Älvsjö.
-- Stationslistorna för tunnelbana, Roslagsbanan och Tvärbanan är ofullständiga. Hittas ingen station på linjen används de 20 närmaste platserna, så långt från linjen kan det bli "Ingen station hittades".
-- Störningar för Roslagsbanan och spårvägarna räknas bara om meddelandet pekar ut linjen.
-- Färgerna på listerna är valda efter utseende och inte hämtade ur SL:s grafiska profil.
-
-## Data
-SL Transport API och SL Deviations API (öppna, ingen nyckel):
-- `https://transport.integration.sl.se/v1`
-- `https://deviations.integration.sl.se/v1`
-
-Den som klistrar in ett skript kör kod från den här repon. Dela den bara med folk du litar på.
+Data kommer från SL:s öppna API:er (Transport och Deviations).
