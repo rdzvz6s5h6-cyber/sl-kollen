@@ -4,6 +4,19 @@ Scriptable-widgets för iPhone som visar SL-trafik från närmaste station: näs
 
 Repon hette först `sl-pendeln` och heter nu **SL-kollen**. Adresserna i laddarna pekar på det nya namnet.
 
+## Så ser det ut
+Pendeltåg:
+
+![Pendeltåg](bilder/pendeltag.jpg)
+
+Tunnelbanan, röda linjen:
+
+![Röda linjen](bilder/roda-linjen.jpg)
+
+Tunnelbanan, blå linjen:
+
+![Blå linjen](bilder/bla-linjen.jpg)
+
 ## Filer
 - `SL-pendeltag.js` – pendeltågs-widgeten. **Det här är filen du redigerar.**
 - `Laddare.js` – liten laddare som alla användare klistrar in i Scriptable en gång. Den hämtar `SL-pendeltag.js` härifrån varje gång widgeten körs och sparar en kopia för när nätet saknas. Ändras aldrig.
