@@ -217,6 +217,13 @@ function splitTwo(text, max) {
   return l2 ? [l1, l2] : [l1];
 }
 
+// Bussar: blåbussar (stomlinjer) blå, övriga röda. Båtar: alltid båtfärgen.
+function badgeColor(d) {
+  if (CFG.key !== "buss") return CFG.color;
+  const g = String((d.line && d.line.group_of_lines) || "");
+  return /blå/i.test(g) ? "#1E5AA8" : "#D32F2F";
+}
+
 const res = await resolve();
 let deps = res.deps;
 let error = res.error;
@@ -305,7 +312,7 @@ if (error) {
     const num = String((d.line && d.line.designation) || "");
     const NW = num.length > 3 ? 52 : 44;
     const lb = row.addStack();
-    lb.backgroundColor = new Color(CFG.color);
+    lb.backgroundColor = new Color(badgeColor(d));
     lb.cornerRadius = 6;
     lb.size = new Size(NW, SMALL ? 20 : 24);
     lb.centerAlignContent();
@@ -376,6 +383,7 @@ if (CFG.FORCE) {
   const lines = [
     "TEST: " + (FDBG.join(", ") || "-"),
     "fält: " + (first ? Object.keys(first).join(",") : "-"),
+    "grupper: " + shown.map(x => `${x.d.line && x.d.line.designation}=${(x.d.line && x.d.line.group_of_lines) || "-"}`).slice(0, 5).join(", "),
     "stop_point: " + (first ? JSON.stringify(first.stop_point || first.stop_area || null) : "-"),
   ];
   for (const l of lines) {
