@@ -9,7 +9,9 @@ Widgets för iPhone som visar nästa avgångar från din närmaste SL-station: m
 Storlekar: liten, mellan och stor.
 
 ## Linjer
-Pendeltåg, tunnelbanans röda, gröna och blå linje, Roslagsbanan, Tvärbanan, Lidingöbanan, Nockebybanan, Saltsjöbanan och Spårväg City. Gula linjen är förberedd och börjar fungera när SL öppnar den.
+Pendeltåg, tunnelbanans röda, gröna och blå linje, Roslagsbanan, Tvärbanan, Lidingöbanan, Nockebybanan, Saltsjöbanan och Spårväg City.
+
+När SL-kollen byggdes hade gula linjen (Fridhemsplan–Älvsjö) inte öppnat än. Skriptet är förberett i förväg och har inte kunnat provas, så det kan behöva justeras efter öppningen.
 
 ## Kom igång
 1. Installera appen **Scriptable** från App Store.
