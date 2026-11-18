@@ -317,6 +317,20 @@ if (error) {
     dest.textColor = Color.white();
     dest.lineLimit = 1;
     dest.minimumScaleFactor = 0.6;
+    // hållplatsläge (stolpen/"busskuren"), t.ex. A, B, C
+    const sp = d.stop_point || {};
+    const lage = String(sp.designation || "").trim();
+    if (lage) {
+      row.addSpacer();
+      const lg = row.addStack();
+      lg.backgroundColor = new Color("#2c2c2e");
+      lg.cornerRadius = 6;
+      lg.setPadding(2, 6, 2, 6);
+      const lt = lg.addText(SMALL ? lage : `Läge ${lage}`);
+      lt.font = Font.mediumSystemFont(SMALL ? 10 : 12);
+      lt.textColor = Color.lightGray();
+      lt.lineLimit = 1;
+    }
     content.addSpacer(3);
   });
   if (shown.length === 0) {
