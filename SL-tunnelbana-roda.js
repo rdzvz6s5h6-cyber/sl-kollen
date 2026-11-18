@@ -87,7 +87,11 @@ async function loadStatus() {
     const code = req.response ? req.response.statusCode : 0;
     if (code !== 200 || !Array.isArray(data)) return fail;
     // Behåll störningar som rör röda linjen. Saknas info om linje räknas den som relevant.
-    const red = data.filter(m => {
+    // Hoppa över meddelanden om entréer, hissar och trappor – de stoppar inte tågen.
+    const ACCESS = /entré|entre|ingång|uppgång|hiss|rulltrappa|trappa|biljettspärr|spärr/i;
+    const isAccess = m => (m.message_variants || [])
+      .some(x => ACCESS.test(`${x.header || ""} ${x.details || ""}`));
+    const red = data.filter(m => !isAccess(m)).filter(m => {
       const lines = (m.scope && m.scope.lines) || [];
       if (lines.length === 0) return true;
       return lines.some(l => /röda/i.test(l.group_of_lines || "") ||

@@ -1,11 +1,13 @@
 # SL-kollen
 
-Scriptable-widget för iPhone som visar SL pendeltåg från närmaste station: nästa tre tåg norrut och söderut, minuter kvar, färg för försening och trafikläget längst ner. Bara text, ingen karta.
+Scriptable-widgets för iPhone som visar SL-trafik från närmaste station: nästa tre avgångar åt varje håll, minuter kvar, färg för försening och trafikläget längst ner. Bara text, ingen karta. Finns för pendeltåg och tunnelbanans röda linje.
+
+Repon hette först `sl-pendeln` och heter nu **SL-kollen**. Adresserna i laddarna pekar på det nya namnet.
 
 ## Filer
 - `SL-pendeltag.js` – pendeltågs-widgeten. **Det här är filen du redigerar.**
 - `Laddare.js` – liten laddare som alla användare klistrar in i Scriptable en gång. Den hämtar `SL-pendeltag.js` härifrån varje gång widgeten körs och sparar en kopia för när nätet saknas. Ändras aldrig.
-- `SL-tunnelbana-roda.js` – tunnelbanans röda linje (13, 14), samma layout. Första version, ej testad på telefon.
+- `SL-tunnelbana-roda.js` – tunnelbanans röda linje (13, 14), samma layout. Testad på telefon: avgångar, riktning och station fungerar (Telefonplan, linje 14).
 - `Laddare-tunnelbana.js` – laddare för tunnelbane-widgeten (egen cache, påverkar inte pendeln).
 
 Lägg båda widgetarna ovanpå varandra på hemskärmen (iOS-stack) för att swipa mellan dem.
@@ -50,6 +52,7 @@ SL Transport API och SL Deviations API (öppna, ingen nyckel):
 - Färggränser för försening är satta till gul 3–5 min, röd 6+ min (gissning, justera `LITE`/`MYCKET`).
 - Röda linjen filtreras på `line.group_of_lines` / `line.designation` (13, 14). Fältnamnen är inte provade mot riktig data.
 - Trafikläget filtreras på röda linjen via `scope.lines`; saknas den räknas störningen som relevant.
+- Meddelanden om entréer, hissar, trappor och spärrar hoppas över (nyckelord i texten, `ACCESS` i koden), eftersom de inte påverkar tågen. Inte verifierat mot alla formuleringar SL använder.
 
 ## Planerat
 - Gröna och blå linjen (Farsta centrum ligger på gröna).
