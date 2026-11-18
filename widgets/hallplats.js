@@ -1,10 +1,15 @@
-// SL-kollen – bussar och båtar. Vilket läge styrs av laddaren (SL_LINJE): buss eller bat.
+// SL-kollen – bussar, båtar och multi (närmaste plats, alla färdsätt). Läget styrs av laddaren (SL_LINJE): buss, bat eller multi.
 // Visar de närmaste avgångarna från närmaste hållplats/brygga, alla linjer och håll blandade i tidsordning.
 const CONFIGS = {
   buss: {
     key: "buss", label: "bussarna", transports: ["BUS"], color: "#1E5AA8", letter: "B",
     stick: 0.15, // km: behåll senaste hållplats om du är närmare än så
     empty: "Inga bussavgångar hittades nära dig",
+  },
+  multi: {
+    key: "multi", label: "linjerna", transports: ["ALL"], color: "#6E6E73", letter: "SL",
+    stick: 0.1,
+    empty: "Inga avgångar hittades nära dig",
   },
   bat: {
     key: "bat", label: "båtarna", transports: ["SHIP", "FERRY"], color: "#0E8A9B", letter: "Bt",
@@ -66,34 +71,46 @@ async function loadSites() {
   return s;
 }
 
-// Hämtar avgångar för alla lägen i CFG. null = kunde inte hämta något.
+// Hämtar avgångar från en plats. tr = null hämtar alla färdsätt. null tillbaka = kunde inte hämta.
+async function fetchOne(id, tr) {
+  const req = new Request(`${BASE}/sites/${id}/departures${tr ? `?transport=${tr}` : ""}`);
+  req.timeoutInterval = 10;
+  try {
+    const data = await req.loadJSON();
+    const code = req.response ? req.response.statusCode : 0;
+    return code === 200 && Array.isArray(data.departures) ? data.departures : null;
+  } catch (e) { return null; }
+}
+
+// Alla lägen i CFG. "ALL" = alla färdsätt (multi): först i ett anrop, annars ett per färdsätt.
 async function fetchDeps(id) {
-  const results = await Promise.all(CFG.transports.map(async tr => {
-    const req = new Request(`${BASE}/sites/${id}/departures?transport=${tr}`);
-    req.timeoutInterval = 10;
-    try {
-      const data = await req.loadJSON();
-      const code = req.response ? req.response.statusCode : 0;
-      return code === 200 && Array.isArray(data.departures) ? data.departures : null;
-    } catch (e) { return null; }
-  }));
+  const trs = CFG.transports;
+  let results;
+  if (trs[0] === "ALL") {
+    const all = await fetchOne(id, null);
+    if (all) return all;
+    results = await Promise.all(["BUS", "METRO", "TRAIN", "TRAM", "SHIP", "FERRY"].map(t => fetchOne(id, t)));
+  } else {
+    results = await Promise.all(trs.map(t => fetchOne(id, t)));
+  }
   const ok = results.filter(r => r);
   return ok.length ? [].concat(...ok) : null;
 }
 
 // Störningar som uttryckligen gäller någon av linjerna som visas.
-async function loadStatus(lines) {
+async function loadStatus(lines, modes) {
   const fail = { text: "Trafikläget kunde inte hämtas", kind: "fail" };
   const ACCESS = /entré|entre|ingång|uppgång|hiss|rulltrappa|trappa|biljettspärr|spärr/i;
   try {
     const all = [];
-    for (const tr of CFG.transports) {
+    const trs = modes || CFG.transports;
+    for (const tr of trs) {
       const req = new Request(`https://deviations.integration.sl.se/v1/messages?transport_mode=${tr}&future=false`);
       req.timeoutInterval = 10;
       const data = await req.loadJSON();
       const code = req.response ? req.response.statusCode : 0;
       if (code === 200 && Array.isArray(data)) all.push(...data);
-      else if (tr === CFG.transports[0]) return fail;
+      else if (tr === trs[0]) return fail;
     }
     const mine = all.filter(m => {
       const txt = (m.message_variants || []).map(x => `${x.header || ""} ${x.details || ""}`).join(" ");
@@ -213,11 +230,31 @@ function splitTwo(text, max) {
 // så blåbussarna listas här efter linjenummer (kontrollera listan om SL ändrar stomnätet).
 const BLUE_BUSES = ["1", "2", "3", "4", "5", "6", "172", "173", "175", "176", "177", "178", "179",
   "471", "474", "670", "676", "677"];
-function badgeColor(d) {
-  if (CFG.key !== "buss") return CFG.color;
-  const l = d.line || {};
+const TRAM_COLORS = { "22": "#E8822B", "21": "#A5682A", "12": "#7A5C3E", "25": "#1FA3A3", "26": "#1FA3A3", "7": "#6FA33A", "7N": "#6FA33A" };
+function busColor(l) {
   const blue = /blå/i.test(String(l.group_of_lines || "")) || BLUE_BUSES.includes(String(l.designation));
   return blue ? "#1E5AA8" : "#D32F2F";
+}
+function badgeColor(d) {
+  const l = d.line || {};
+  if (CFG.key === "buss") return busColor(l);
+  if (CFG.key !== "multi") return CFG.color;
+  const n = String(l.designation), g = String(l.group_of_lines || "");
+  const m = String(l.transport_mode || "").toUpperCase();
+  if (m === "METRO") {
+    if (/röd/i.test(g) || ["13", "14"].includes(n)) return "#E5322D";
+    if (/grön/i.test(g) || ["17", "18", "19"].includes(n)) return "#2E9E4F";
+    return "#0089CA";
+  }
+  if (m === "TRAIN") return (/roslags/i.test(g) || ["27", "28", "29"].includes(n)) ? "#8E4A9E" : "#EC619F";
+  if (m === "TRAM") return TRAM_COLORS[n] || "#E8822B";
+  if (m === "SHIP" || m === "FERRY") return "#0E8A9B";
+  return busColor(l);
+}
+// Bokstav i märket uppe till vänster (multi: efter första avgångens färdsätt)
+function modeLetter(d) {
+  const m = String(((d.line || {}).transport_mode) || "").toUpperCase();
+  return { METRO: "T", TRAIN: "P", TRAM: "S", SHIP: "Bt", FERRY: "Bt", BUS: "B" }[m] || "SL";
 }
 
 const res = await resolve();
@@ -234,7 +271,10 @@ const all = error ? [] : deps
   .filter(x => x.i.left >= -1)
   .sort((a, b) => a.i.exp - b.i.exp);
 let shown = all.slice(0, ROWS);
-const status = error ? null : await loadStatus([...new Set(shown.map(x => String(x.d.line && x.d.line.designation)))]);
+const modeOf = d => String((d.line && d.line.transport_mode) || "").toUpperCase().replace("FERRY", "SHIP");
+const statusModes = CFG.transports[0] === "ALL"
+  ? [...new Set(shown.map(x => modeOf(x.d)).filter(Boolean))] : null;
+const status = error ? null : await loadStatus([...new Set(shown.map(x => String(x.d.line && x.d.line.designation)))], statusModes && statusModes.length ? statusModes : null);
 // Stor widget: störningar går före avgångar. Varje störning som visas helt tar ca två rader.
 const fullN = LARGE && status && status.kind === "bad" ? Math.min(status.items.length, MAX_FULL) : 0;
 if (fullN) shown = shown.slice(0, Math.max(3, ROWS - 2 * fullN));
@@ -244,7 +284,10 @@ w.backgroundColor = Color.black();
 w.setPadding(0, 0, 0, 0);
 const bar = w.addStack();
 bar.size = new Size(0, 5);
-bar.backgroundColor = new Color(CFG.color);
+const first0 = shown[0] && shown[0].d;
+const topColor = CFG.key === "multi" && first0 ? badgeColor(first0) : CFG.color;
+const topLetter = CFG.key === "multi" && first0 ? modeLetter(first0) : CFG.letter;
+bar.backgroundColor = new Color(topColor);
 bar.addSpacer();
 
 const content = w.addStack();
@@ -268,7 +311,7 @@ function lineBadge(letter, color) {
   dc.drawTextInRect(letter, new Rect(0, letter.length > 1 ? 24 : 15, N, N - 15));
   return dc.getImage();
 }
-const badge = top.addImage(lineBadge(CFG.letter, CFG.color));
+const badge = top.addImage(lineBadge(topLetter, topColor));
 badge.imageSize = new Size(24, 24);
 top.addSpacer(6);
 const t1 = top.addText(stName);

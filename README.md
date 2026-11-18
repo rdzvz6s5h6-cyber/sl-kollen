@@ -9,9 +9,9 @@ Widgets för iPhone som visar nästa avgångar från din närmaste SL-station: m
 Storlekar: liten, mellan och stor.
 
 ## Linjer
-Pendeltåg, tunnelbanans röda, gröna och blå linje, Roslagsbanan, Tvärbanan, Lidingöbanan, Nockebybanan, Saltsjöbanan, Spårväg City och bussar. Dessutom en widget för båtar.
+Pendeltåg, tunnelbanans röda, gröna och blå linje, Roslagsbanan, Tvärbanan, Lidingöbanan, Nockebybanan, Saltsjöbanan, Spårväg City och bussar. Dessutom en widget för båtar och en **Multi** som väljer själv.
 
-**Status:** alla utom två är provade mot riktig data. Gula linjen (Fridhemsplan–Älvsjö) hade inte öppnat när SL-kollen byggdes, så skriptet är förberett i förväg och kan behöva justeras efter öppningen. Båtwidgeten är inte provad än.
+**Status:** alla utom två är provade mot riktig data. Gula linjen (Fridhemsplan–Älvsjö) hade inte öppnat när SL-kollen byggdes, så skriptet är förberett i förväg och kan behöva justeras efter öppningen. Båtwidgeten och Multi är inte provade än.
 
 ## Kom igång
 1. Installera appen **Scriptable** från App Store.
@@ -26,6 +26,7 @@ Vill du ha flera linjer gör du ett skript per linje. Lägg widgetarna i en iOS-
 - Längst ner står trafikläget. Grön text betyder inga störningar, gul är en störning.
 - Stationen väljs automatiskt utifrån din plats.
 - Buss och båt visar en lista med alla linjer från närmaste hållplats eller brygga i tidsordning, med linjenumret bredvid. Blåbussar har blå bricka och övriga bussar röd. På bussar står också hållplatsläget (Läge A, B …).
+- Multi (`Multi.js`) visar närmaste plats oavsett färdsätt, med alla linjer från den platsen i tidsordning. Brickorna har linjens färg. Den är inte provad än.
 - Stor buss-widget visar upp till 10 avgångar. Finns det störningar visas de i sin helhet och tar då plats från de sista avgångarna.
 
 ## Uppdateringar
