@@ -3,7 +3,6 @@
 const CONFIGS = {
   buss: {
     key: "buss", label: "bussarna", transports: ["BUS"], color: "#1E5AA8", letter: "B",
-    FORCE: "årstaberg", // TILLFÄLLIGT TEST: tvingar hållplatser vars namn börjar så. Ta bort raden när testet är klart.
     stick: 0.15, // km: behåll senaste hållplats om du är närmare än så
     empty: "Inga bussavgångar hittades nära dig",
   },
@@ -118,7 +117,6 @@ async function loadStatus(lines) {
 }
 
 const norm = s => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
-const FDBG = [];
 async function resolve() {
   let loc = null;
   try { Location.setAccuracyToHundredMeters(); loc = await Location.current(); } catch (e) {}
@@ -127,7 +125,7 @@ async function resolve() {
     if (last) return { st: last, note: "senaste plats" };
     return { error: "Plats saknas. Kör skriptet i appen." };
   }
-  if (!CFG.FORCE && last && last.lat !== undefined &&
+  if (last && last.lat !== undefined &&
       km(loc.latitude, loc.longitude, last.lat, last.lon) < CFG.stick) {
     return { st: last, note: "" };
   }
@@ -135,20 +133,6 @@ async function resolve() {
   if (!sites) {
     if (last) return { st: last, note: "senaste plats" };
     return { error: "Kör skriptet i appen en gång" };
-  }
-  if (CFG.FORCE) {
-    const forced = sites.filter(s => norm(s[1]).startsWith(CFG.FORCE))
-      .sort((a, b) => (/station/.test(norm(a[1])) ? 0 : 1) - (/station/.test(norm(b[1])) ? 0 : 1))
-      .slice(0, 8);
-    const fr = await Promise.all(forced.map(s => fetchDeps(s[0])));
-    forced.forEach((s, i) => FDBG.push(`${s[1]}:${fr[i] ? fr[i].length : "x"}`));
-    if (!forced.length) FDBG.push("inga platser börjar på " + CFG.FORCE);
-    for (let i = 0; i < forced.length; i++) {
-      if (fr[i] && fr[i].length) {
-        const s = forced[i];
-        return { st: { id: s[0], name: s[1], lat: s[2], lon: s[3] }, deps: fr[i], note: "testläge" };
-      }
-    }
   }
   const near = sites
     .map(s => ({ s, d: km(loc.latitude, loc.longitude, s[2], s[3]) }))
@@ -474,21 +458,6 @@ if (status) {
       tx.minimumScaleFactor = 0.8;
       row.addSpacer();
     }
-  }
-}
-
-if (CFG.FORCE && !SMALL) {
-  const first = shown[0] && shown[0].d;
-  const lines = [
-    "TEST: " + (FDBG.join(", ") || "-"),
-    "fält: " + (first ? Object.keys(first).join(",") : "-"),
-    "grupper: " + shown.map(x => `${x.d.line && x.d.line.designation}=${(x.d.line && x.d.line.group_of_lines) || "-"}`).slice(0, 5).join(", "),
-    "stop_point: " + (first ? JSON.stringify(first.stop_point || first.stop_area || null) : "-"),
-  ];
-  for (const l of lines) {
-    const dt = content.addText(l.slice(0, 160));
-    dt.font = Font.systemFont(7);
-    dt.textColor = Color.gray();
   }
 }
 
