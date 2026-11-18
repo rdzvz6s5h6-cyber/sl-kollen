@@ -18,7 +18,7 @@ const sitesPath = fm.joinPath(dir, "sl_sites.json");
 const lastPath = fm.joinPath(dir, "sl_last_station.json");
 const min = (a, b) => Math.round((a - b) / 60000);
 const shortName = n => String(n)
-  .replace(/^Upplands Väsby$/i, "Väsby")
+  .replace(/^Upplands Väsby$/i, "Upl. Väsby")
   .replace(/\s+centrum$/i, " C");
 
 function readJSON(p) {
