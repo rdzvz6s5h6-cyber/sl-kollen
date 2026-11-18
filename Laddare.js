@@ -1,5 +1,5 @@
 // SL Pendeltåg – laddare (klistra in i Scriptable, uppdateras aldrig)
-const URL = "https://raw.githubusercontent.com/rdzvz6s5h6-cyber/sl-pendeln/main/SL-pendeltag.js";
+const URL = "https://raw.githubusercontent.com/rdzvz6s5h6-cyber/SL-kollen/main/SL-pendeltag.js";
 
 const fm = FileManager.local();
 const cache = fm.joinPath(fm.documentsDirectory(), "sl_widget_cache.js");

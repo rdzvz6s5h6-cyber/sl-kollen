@@ -1,4 +1,4 @@
-# SL-pendeln
+# SL-kollen
 
 Scriptable-widget för iPhone som visar SL pendeltåg från närmaste station: nästa tre tåg norrut och söderut, minuter kvar, färg för försening och trafikläget längst ner. Bara text, ingen karta.
 
