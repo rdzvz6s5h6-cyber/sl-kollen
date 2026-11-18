@@ -34,7 +34,7 @@ Vill du ha flera linjer gör du ett eget skript per linje. De kan läggas ovanp�
 Widgeten anpassar sig efter storleken du väljer på hemskärmen:
 - **Liten:** stationsnamn och nästa avgång åt varje håll. Visar "Störning" i gult om det finns en, annars klockslaget.
 - **Medium:** tre avgångar åt varje håll och trafikläge.
-- **Stor:** upp till sex avgångar åt varje håll (om SL levererar så många).
+- **Stor:** upp till tio avgångar åt varje håll (om SL levererar så många).
 
 Att köra skriptet inuti Scriptable visar alltid mediumvarianten.
 
