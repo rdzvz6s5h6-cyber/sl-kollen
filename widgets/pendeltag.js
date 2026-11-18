@@ -80,7 +80,7 @@ async function loadStatus() {
     const sv = v.find(x => x.language === "sv") || v[0] || {};
     let t = String(sv.header || sv.details || "Störning på pendeltåget")
       .replace(/\s+/g, " ").trim();
-    if (data.length > 1) t += ` (+${data.length - 1} till)`;
+    if (data.length > 1) t += `\u00A0(+${data.length - 1}\u00A0till)`;
     return { text: t, kind: "bad" };
   } catch (e) {
     return fail;

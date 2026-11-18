@@ -114,6 +114,8 @@ async function loadSites() {
   return s;
 }
 
+const SEEN = new Set();   // linjer som SL visade på provade stationer (visas bara i appen vid fel)
+const TRIED = [];          // stationer som provats
 const norm = s => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
 const isRed = d => {
   const l = d.line || {};
@@ -128,6 +130,10 @@ async function fetchTrains(id) {
     const data = await req.loadJSON();
     const code = req.response ? req.response.statusCode : 0;
     if (code !== 200 || !data.departures) return null;
+    data.departures.forEach(d => {
+      const l = d.line || {};
+      SEEN.add(`${l.designation || "?"}/${l.group_of_lines || "?"}`);
+    });
     return data.departures.filter(isRed);
   } catch (e) {
     return null;
@@ -161,7 +167,7 @@ async function loadStatus() {
     const sv = v.find(x => x.language === "sv") || v[0] || {};
     let t = String(sv.header || sv.details || `Störning på ${CFG.label}`)
       .replace(/\s+/g, " ").trim();
-    if (red.length > 1) t += ` (+${red.length - 1} till)`;
+    if (red.length > 1) t += `\u00A0(+${red.length - 1}\u00A0till)`;
     return { text: t, kind: "bad" };
   } catch (e) {
     return fail;
@@ -196,9 +202,10 @@ async function resolve() {
     .sort((a, b) => a.d - b.d);
 
   // 1) närmaste stationer vars namn finns på linjen, 2) annars de 20 närmaste platserna
-  const named = byDist(sites.filter(s => CFG.names.includes(norm(s[1])))).slice(0, 4);
+  const named = byDist(sites.filter(s => CFG.names.includes(norm(s[1])))).slice(0, 10);
   const any = byDist(sites).slice(0, CANDIDATES);
   for (const group of [named, any]) {
+    group.slice(0, 3).forEach(x => TRIED.push(x.s[1]));
     const results = await Promise.all(group.map(x => fetchTrains(x.s[0])));
     for (let i = 0; i < group.length; i++) {
       if (results[i] && results[i].length > 0) {
@@ -404,6 +411,11 @@ if (error) {
   const e = content.addText(error);
   e.font = Font.systemFont(13);
   e.textColor = Color.orange();
+  if (!config.runsInWidget && (TRIED.length || SEEN.size)) {
+    const dbg = content.addText(`Provade: ${TRIED.slice(0, 4).join(", ") || "-"}. Linjer sedda: ${[...SEEN].slice(0, 6).join(", ") || "-"}`);
+    dbg.font = Font.systemFont(9);
+    dbg.textColor = Color.gray();
+  }
 } else {
   const all = deps
     .map(d => ({ d, i: info(d, now) }))
