@@ -10,7 +10,10 @@ Repon hette först `sl-pendeln` och heter nu **SL-kollen**. Adresserna i laddarn
 - `SL-tunnelbana-roda.js` – tunnelbanans röda linje (13, 14), samma layout. Testad på telefon: avgångar, riktning och station fungerar (Telefonplan, linje 14).
 - `Laddare-tunnelbana.js` – laddare för tunnelbane-widgeten (egen cache, påverkar inte pendeln).
 
-Lägg båda widgetarna ovanpå varandra på hemskärmen (iOS-stack) för att swipa mellan dem.
+- `SL-linje.js` – gemensam widget för fler linjer: röda, gröna och blå linjen, Roslagsbanan och Tvärbanan. Vilken linje som visas styrs av en rad i laddaren.
+- `Laddare-linje.js` – laddare till `SL-linje.js`. Ändra raden `LINJE` (`"roda"`, `"gron"`, `"bla"`, `"roslagsbanan"`, `"tvarbanan"`) i ett eget skript per linje.
+
+Lägg widgetarna ovanpå varandra på hemskärmen (iOS-stack) för att swipa mellan dem.
 
 ## Installera (för dig eller en kompis)
 1. Installera appen Scriptable.
@@ -53,6 +56,15 @@ SL Transport API och SL Deviations API (öppna, ingen nyckel):
 - Röda linjen filtreras på `line.group_of_lines` / `line.designation` (13, 14). Fältnamnen är inte provade mot riktig data.
 - Trafikläget filtreras på röda linjen via `scope.lines`; saknas den räknas störningen som relevant.
 - Meddelanden om entréer, hissar, trappor och spärrar hoppas över (nyckelord i texten, `ACCESS` i koden), eftersom de inte påverkar tågen. Inte verifierat mot alla formuleringar SL använder.
+
+## Fler linjer (SL-linje.js) – ej verifierat
+Bara röda linjen är provad mot riktig data (via `SL-tunnelbana-roda.js`). För övriga är följande gissat:
+- Gröna och blå linjen: samma API-läge som röda (METRO), linjenummer 17–19 respektive 10–11, riktning efter slutstation.
+- Roslagsbanan: antas ligga under läget TRAIN, linje 27–29. Tvärbanan: antas ligga under TRAM, linje 30–31. Rubrikerna är VÄSTER/ÖSTER för Tvärbanan.
+- Färger och bokstav är gissade: grön #2E9E4F, blå #0089CA, Roslagsbanan lila med R, Tvärbanan orange med Tv.
+- Stationslistorna är ofullständiga. Hittas ingen station i listan används de 20 närmaste platserna, så långt från linjen kan det bli "Ingen station hittades".
+- Störningar för Roslagsbanan och Tvärbanan räknas bara om meddelandet uttryckligen pekar ut linjen.
+- Rubrik och trafikläge använder `label` i inställningarna överst i filen.
 
 ## Planerat
 - Gröna och blå linjen (Farsta centrum ligger på gröna).
