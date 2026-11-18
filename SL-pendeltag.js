@@ -259,7 +259,7 @@ function lineBadge(letter, color) {
 const badge = top.addImage(lineBadge(LINE_LETTER, LINE_COLOR));
 badge.imageSize = new Size(24, 24);
 top.addSpacer(6);
-const t1 = top.addText(`Pendeltåg: ${stName}`);
+const t1 = top.addText(stName);
 t1.font = Font.boldSystemFont(16);
 t1.textColor = Color.white();
 t1.lineLimit = 1;
