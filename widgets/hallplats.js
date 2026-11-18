@@ -110,6 +110,7 @@ async function loadStatus(lines) {
 }
 
 const norm = s => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+const FDBG = [];
 async function resolve() {
   let loc = null;
   try { Location.setAccuracyToHundredMeters(); loc = await Location.current(); } catch (e) {}
@@ -130,6 +131,8 @@ async function resolve() {
   if (CFG.FORCE) {
     const forced = sites.filter(s => norm(s[1]).startsWith(CFG.FORCE)).slice(0, 8);
     const fr = await Promise.all(forced.map(s => fetchDeps(s[0])));
+    forced.forEach((s, i) => FDBG.push(`${s[1]}:${fr[i] ? fr[i].length : "x"}`));
+    if (!forced.length) FDBG.push("inga platser börjar på " + CFG.FORCE);
     for (let i = 0; i < forced.length; i++) {
       if (fr[i] && fr[i].length) {
         const s = forced[i];
@@ -319,7 +322,7 @@ if (error) {
     dest.minimumScaleFactor = 0.6;
     // hållplatsläge (stolpen/"busskuren"), t.ex. A, B, C
     const sp = d.stop_point || {};
-    const lage = String(sp.designation || "").trim();
+    const lage = String(sp.designation || (d.stop && d.stop.designation) || d.stop_point_designation || "").trim();
     if (lage) {
       row.addSpacer();
       const lg = row.addStack();
@@ -363,6 +366,20 @@ if (status) {
       tx.minimumScaleFactor = 0.8;
       row.addSpacer();
     }
+  }
+}
+
+if (CFG.FORCE) {
+  const first = shown[0] && shown[0].d;
+  const lines = [
+    "TEST: " + (FDBG.join(", ") || "-"),
+    "fält: " + (first ? Object.keys(first).join(",") : "-"),
+    "stop_point: " + (first ? JSON.stringify(first.stop_point || first.stop_area || null) : "-"),
+  ];
+  for (const l of lines) {
+    const dt = content.addText(l.slice(0, 160));
+    dt.font = Font.systemFont(7);
+    dt.textColor = Color.gray();
   }
 }
 
