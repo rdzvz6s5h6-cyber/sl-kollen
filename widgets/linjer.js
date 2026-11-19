@@ -431,10 +431,16 @@ if (!SMALL) {
   top.addSpacer();
   const right = top.addStack();
   right.layoutVertically();
-  const t2 = right.addText(`Uppdaterat ${stamp}`);
+  const ur = right.addStack();
+  ur.centerAlignContent();
+  ur.addSpacer();
+  const ic = ur.addImage(SFSymbol.named("arrow.clockwise").image);
+  ic.imageSize = new Size(10, 10);
+  ic.tintColor = Color.gray();
+  ur.addSpacer(3);
+  const t2 = ur.addText(stamp);
   t2.font = Font.systemFont(10);
   t2.textColor = Color.gray();
-  t2.rightAlignText();
   if (res.note) {
     const n = right.addText(res.note);
     n.font = Font.systemFont(9);
@@ -486,6 +492,12 @@ const sColor = status.kind === "bad" ? new Color(PAL.y.bg)
 if (SMALL) {
   const srow = content.addStack();
   srow.addSpacer();
+  if (status.kind !== "bad") {
+    const sic = srow.addImage(SFSymbol.named("arrow.clockwise").image);
+    sic.imageSize = new Size(10, 10);
+    sic.tintColor = Color.gray();
+    srow.addSpacer(3);
+  }
   const st = srow.addText(status.kind === "bad" ? "Störning" : stamp);
   st.font = Font.systemFont(10);
   st.textColor = status.kind === "bad" ? new Color(PAL.y.bg) : Color.gray();
