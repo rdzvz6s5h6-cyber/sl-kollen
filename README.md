@@ -3,9 +3,13 @@
 Widgets för iPhone som visar nästa avgångar från din närmaste SL-station eller SL-hållplats: minuter kvar, färg för försening och trafikläget. Bara text.
 
 <p align="center">
-  <img src="bilder/pendeltag-liten.jpg" height="200" alt="Liten">
-  <img src="bilder/pendeltag-mellan.jpg" height="200" alt="Mellan">
-  <img src="bilder/pendeltag-stor.jpg" height="200" alt="Stor">
+  <img src="bilder/pendeltag-liten.jpg" width="180" alt="Liten">
+</p>
+<p align="center">
+  <img src="bilder/pendeltag-mellan.jpg" width="380" alt="Mellan">
+</p>
+<p align="center">
+  <img src="bilder/pendeltag-stor.jpg" width="380" alt="Stor">
 </p>
 
 Storlekar: liten, mellan och stor.
