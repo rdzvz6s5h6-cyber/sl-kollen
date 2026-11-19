@@ -25,7 +25,7 @@ Vill du ha flera linjer gör du ett skript per linje. Lägg widgetarna i en iOS-
 - Pillerna visar minuter kvar. Grön är i tid, gul är försenad och röd är mycket försenad eller inställd.
 - Längst ner står trafikläget. Grön text betyder inga störningar, gul är en störning.
 - Stationen väljs automatiskt utifrån din plats.
-- Buss och båt visar en lista med alla linjer från närmaste hållplats eller brygga i tidsordning, med linjenumret bredvid. Blåbussar har blå bricka och övriga bussar röd. På bussar står också hållplatsläget (Läge A, B …).
+- Buss och båt visar en lista med alla linjer från närmaste hållplats eller brygga i tidsordning, med linjenumret bredvid. Blåbussar har blå bricka och övriga bussar röd. Platsen står i en liten ruta: Spår för tåg och tunnelbana, Läge för buss och Brygga för båt.
 - Multi (`Multi.js`) visar närmaste plats oavsett färdsätt, med alla linjer från den platsen i tidsordning. Brickorna har linjens färg. Den är inte provad än.
 - Stor buss-widget visar upp till 10 avgångar. Finns det störningar visas de i sin helhet och tar då plats från de sista avgångarna.
 

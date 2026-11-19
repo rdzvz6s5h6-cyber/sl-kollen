@@ -24,7 +24,7 @@ const FAMILY = config.widgetFamily || "medium";
 const SMALL = FAMILY === "small";
 const LARGE = FAMILY === "large";
 const ROWS = SMALL ? 2 : LARGE ? 10 : 3;
-const MAX_FULL = 3; // stor widget: så många störningar visas i sin helhet
+const MAX_FULL = 2; // stor widget: så många störningar visas i sin helhet
 const CANDIDATES = 15;
 const LINE_MAX = 50;
 const BASE = "https://transport.integration.sl.se/v1";
@@ -257,6 +257,16 @@ function modeLetter(d) {
   return { METRO: "T", TRAIN: "P", TRAM: "S", SHIP: "Bt", FERRY: "Bt", BUS: "B" }[m] || "SL";
 }
 
+// Etikett för plats-rutan: spår för tåg och tunnelbana, läge för buss, brygga för båt. Spårvagn visar ingen ruta.
+function platsEtikett(d) {
+  const m0 = String(((d.line || {}).transport_mode) || "").toUpperCase();
+  const m = m0 || (CFG.key === "buss" ? "BUS" : CFG.key === "bat" ? "SHIP" : "");
+  if (m === "TRAIN" || m === "METRO") return "Spår";
+  if (m === "BUS") return "Läge";
+  if (m === "SHIP" || m === "FERRY") return "Brygga";
+  return null;
+}
+
 const res = await resolve();
 let deps = res.deps;
 let error = res.error;
@@ -376,7 +386,7 @@ if (error) {
       nt0.lineLimit = 1;
       nt0.minimumScaleFactor = 0.7;
       lb0.addSpacer();
-      if (lage0) {
+      if (lage0 && platsEtikett(d)) {
         top2.addSpacer(4);
         const lg0 = top2.addStack();
         lg0.backgroundColor = new Color("#2c2c2e");
@@ -449,13 +459,13 @@ if (error) {
       dest.textColor = Color.white();
       dest.lineLimit = 1;
       dest.minimumScaleFactor = 0.6;
-      if (lage) {
+      if (lage && platsEtikett(d)) {
         row.addSpacer();
         const lg = row.addStack();
         lg.backgroundColor = new Color("#2c2c2e");
         lg.cornerRadius = 6;
         lg.setPadding(2, 6, 2, 6);
-        const lt = lg.addText(`Läge ${lage}`);
+        const lt = lg.addText(`${platsEtikett(d)} ${lage}`);
         lt.font = Font.mediumSystemFont(12);
         lt.textColor = Color.lightGray();
         lt.lineLimit = 1;
