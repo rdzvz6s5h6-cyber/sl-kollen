@@ -281,13 +281,28 @@ const all = error ? [] : deps
   .filter(x => x.i.left >= -1)
   .sort((a, b) => a.i.exp - b.i.exp);
 let shown = all.slice(0, ROWS);
+// Buss, medium/stor: dela upp per fysiskt stopp (läge). Varje stopp ligger på en sida av vägen, alltså en riktning.
+const spKey = d => { const sp = d.stop_point || {}; return String(sp.id || sp.designation || ""); };
+let groups = null;
+if (CFG.key === "buss" && !SMALL) {
+  const gm = new Map();
+  for (const x of all) { const k = spKey(x.d); if (!gm.has(k)) gm.set(k, []); gm.get(k).push(x); }
+  if (!gm.has("") && gm.size >= 2) {
+    const COLROWS = LARGE ? 5 : 3;
+    groups = [...gm.values()].slice(0, 2).map(g => g.slice(0, COLROWS));
+    const lg = g => String(((g[0].d.stop_point || {}).designation) || "");
+    groups.sort((a, b) => lg(a).localeCompare(lg(b)));
+    shown = groups.flat();
+  }
+}
 const modeOf = d => String((d.line && d.line.transport_mode) || "").toUpperCase().replace("FERRY", "SHIP");
 const statusModes = CFG.transports[0] === "ALL"
   ? [...new Set(shown.map(x => modeOf(x.d)).filter(Boolean))] : null;
 const status = error ? null : await loadStatus([...new Set(shown.map(x => String(x.d.line && x.d.line.designation)))], statusModes && statusModes.length ? statusModes : null);
 // Stor widget: störningar går före avgångar. Varje störning som visas helt tar ca två rader.
 const fullN = LARGE && status && status.kind === "bad" ? Math.min(status.items.length, MAX_FULL) : 0;
-if (fullN) shown = shown.slice(0, Math.max(3, ROWS - 2 * fullN));
+if (fullN && groups) groups = groups.map(g => g.slice(0, Math.max(2, g.length - fullN)));
+else if (fullN) shown = shown.slice(0, Math.max(3, ROWS - 2 * fullN));
 
 const w = new ListWidget();
 w.backgroundColor = Color.black();
@@ -357,6 +372,57 @@ if (error) {
   const e = content.addText(error);
   e.font = Font.systemFont(13);
   e.textColor = Color.orange();
+} else if (groups) {
+  const colW = Math.floor((Math.min(Device.screenSize().width - 32, 360) - 24 - 13) / 2);
+  const maxN = Math.max(...groups.map(g => g.length));
+  const cols = content.addStack();
+  cols.topAlignContent();
+  groups.forEach((g, gi) => {
+    if (gi) {
+      cols.addSpacer(6);
+      const dv = cols.addStack();
+      dv.backgroundColor = new Color("#3a3a3c");
+      dv.size = new Size(1, maxN * 27 + 16);
+      cols.addSpacer(6);
+    }
+    const col = cols.addStack();
+    col.layoutVertically();
+    col.size = new Size(colW, 0);
+    const lage = String(((g[0].d.stop_point || {}).designation) || "").trim();
+    const dests = [...new Set(g.slice(0, 2).map(x => shortName(x.d.destination)))].join("/");
+    const ht = col.addText(lage ? `Läge ${lage} · mot ${dests}` : `Mot ${dests}`);
+    ht.font = Font.mediumSystemFont(10);
+    ht.textColor = Color.gray();
+    ht.lineLimit = 1;
+    ht.minimumScaleFactor = 0.6;
+    col.addSpacer(4);
+    g.forEach(({ d, i }) => {
+      const row = col.addStack();
+      row.centerAlignContent();
+      pill(row, i, false);
+      row.addSpacer(4);
+      const num = String((d.line && d.line.designation) || "");
+      const lb = row.addStack();
+      lb.backgroundColor = new Color(badgeColor(d));
+      lb.cornerRadius = 5;
+      lb.size = new Size(num.length > 3 ? 36 : 30, 20);
+      lb.centerAlignContent();
+      lb.addSpacer();
+      const nt = lb.addText(num);
+      nt.font = Font.boldSystemFont(12);
+      nt.textColor = Color.white();
+      nt.lineLimit = 1;
+      nt.minimumScaleFactor = 0.7;
+      lb.addSpacer();
+      row.addSpacer(4);
+      const dt = row.addText(shortName(d.destination));
+      dt.font = Font.mediumSystemFont(11);
+      dt.textColor = Color.white();
+      dt.lineLimit = 1;
+      dt.minimumScaleFactor = 0.6;
+      col.addSpacer(5);
+    });
+  });
 } else {
   // Stor widget: två kolumner av rader skulle bli trångt, så en lista över hela bredden.
   shown.forEach((item, idx) => {
