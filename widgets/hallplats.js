@@ -177,17 +177,33 @@ async function resolve() {
 // Vald station: namnet kommer från widgetens Parameter (eller sparas första gången i appen).
 async function resolveVald() {
   const namePath = fm.joinPath(dir, "sl_vald_namn.txt");
-  let name = String(args.widgetParameter || "").trim();
-  if (!name && fm.fileExists(namePath)) name = fm.readString(namePath).trim();
-  if (!name && !config.runsInWidget) {
+  const FAST = typeof SL_STATION !== "undefined" ? String(SL_STATION || "").trim() : "";
+  const askName = async (title) => {
     const a = new Alert();
-    a.title = "Vilken station?";
+    a.title = title;
     a.message = "Skriv namnet, till exempel Årstaberg.";
     a.addTextField("Stationens namn");
     a.addAction("Spara");
     await a.presentAlert();
-    name = String(a.textFieldValue(0) || "").trim();
-    if (name) fm.writeString(namePath, name);
+    const v = String(a.textFieldValue(0) || "").trim();
+    if (v) fm.writeString(namePath, v);
+    return v;
+  };
+  // Ordning: Parameter på widgeten, STATION överst i skriptet, sparat namn
+  let name = String(args.widgetParameter || "").trim() || FAST;
+  if (!name && fm.fileExists(namePath)) name = fm.readString(namePath).trim();
+  if (!config.runsInWidget && !String(args.widgetParameter || "").trim() && !FAST) {
+    // Körs i appen: visa vald station och låt användaren byta den
+    if (name) {
+      const m = new Alert();
+      m.title = `Station: ${name}`;
+      m.message = "Widgeten på hemskärmen använder den här stationen om du inte skrivit något i dess Parameter.";
+      m.addAction("Visa widget");
+      m.addAction("Byt station");
+      if (await m.presentAlert() === 1) name = (await askName("Vilken station?")) || name;
+    } else {
+      name = await askName("Vilken station?");
+    }
   }
   if (!name) return { error: "Ange station: håll in widgeten, Redigera widget, Parameter" };
   const n = norm(name);
@@ -328,22 +344,25 @@ const BUSVIEW = CFG.key === "buss" || ((CFG.key === "multi" || CFG.key === "vald
 // Buss, medium/stor: dela upp per fysiskt stopp (läge). Varje stopp ligger på en sida av vägen, alltså en riktning.
 const spKey = d => { const sp = d.stop_point || {}; return String(sp.id || sp.designation || ""); };
 let groups = null;
+let oneHead = "";
 let heads = [];
 if (BUSVIEW && !SMALL) {
   const gm = new Map();
   for (const x of all) { const k = spKey(x.d); if (!gm.has(k)) gm.set(k, []); gm.get(k).push(x); }
-  if (!gm.has("") && gm.size >= 2) {
+  const lg = g => String(((g[0].d.stop_point || {}).designation) || "").trim();
+  // Rubrik: läge (om SL anger det) och linjerna som stannar vid stoppet. Lika rubriker får slutstation.
+  const linesOf = g => [...new Set(g.map(x => String((x.d.line && x.d.line.designation) || "")))].sort((a, b) => a.localeCompare(b, "sv", { numeric: true }));
+  const mkHead = g => {
+    const ln = linesOf(g);
+    const lt = ln.length > 1 ? ln.join(", ") : `Linje ${ln[0]}`;
+    return lg(g) ? `Läge ${lg(g)} · ${lt}` : lt;
+  };
+  if (!gm.has("") && gm.size === 1) {
+    oneHead = mkHead([...gm.values()][0]);
+  } else if (!gm.has("") && gm.size >= 2) {
     const COLROWS = LARGE ? 8 : 3;
     const gl = [...gm.values()].slice(0, 2);
-    const lg = g => String(((g[0].d.stop_point || {}).designation) || "").trim();
     gl.sort((a, b) => lg(a).localeCompare(lg(b)));
-    // Rubrik: läge (om SL anger det) och linjerna som stannar vid stoppet. Lika rubriker får slutstation.
-    const linesOf = g => [...new Set(g.map(x => String((x.d.line && x.d.line.designation) || "")))].sort((a, b) => a.localeCompare(b, "sv", { numeric: true }));
-    const mkHead = g => {
-      const ln = linesOf(g);
-      const lt = ln.length > 1 ? ln.join(", ") : `Linje ${ln[0]}`;
-      return lg(g) ? `Läge ${lg(g)} · ${lt}` : lt;
-    };
     heads = gl.map(mkHead);
     if (heads[0] === heads[1]) {
       heads = gl.map((g, i) => `${heads[i]} · mot ${[...new Set(g.slice(0, 2).map(x => shortName(x.d.destination)))].join("/")}`);
@@ -395,6 +414,15 @@ if (groups && !error) {
     ht.lineLimit = 1;
     ht.minimumScaleFactor = 0.6;
   });
+  band.addSpacer();
+} else if (oneHead && !error) {
+  const band = w.addStack();
+  band.backgroundColor = new Color("#1c1c1e");
+  band.setPadding(4, 12, 4, 12);
+  const ot = band.addText(oneHead);
+  ot.font = Font.mediumSystemFont(10);
+  ot.textColor = Color.gray();
+  ot.lineLimit = 1;
   band.addSpacer();
 }
 
@@ -687,7 +715,7 @@ if (error) {
       dest.textColor = Color.white();
       dest.lineLimit = 1;
       dest.minimumScaleFactor = 0.6;
-      if (lage && platsEtikett(d)) {
+      if (lage && platsEtikett(d) && !oneHead) {
         row.addSpacer();
         const lg = row.addStack();
         lg.backgroundColor = new Color("#2c2c2e");
