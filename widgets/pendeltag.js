@@ -337,13 +337,15 @@ const LINE_LETTER = "P";
 
 // Liten widget: bara nästa avgång per håll
 function smallRow(parent, title, item) {
-  const hs = parent.addStack();
-  hs.size = new Size(56, 0); // samma bredd som pillret så att rubriken centreras över det
-  hs.addSpacer();
-  const h = hs.addText(title);
-  h.font = Font.boldSystemFont(9);
-  h.textColor = Color.gray();
-  hs.addSpacer();
+  if (title) {
+    const hs = parent.addStack();
+    hs.size = new Size(56, 0); // samma bredd som pillret så att rubriken centreras över det
+    hs.addSpacer();
+    const h = hs.addText(title);
+    h.font = Font.boldSystemFont(9);
+    h.textColor = Color.gray();
+    hs.addSpacer();
+  }
   if (!item) {
     const t = parent.addText("–");
     t.font = Font.systemFont(18);
@@ -486,7 +488,7 @@ if (error) {
     if (TERM) {
       smallRow(body, TERM_TITLE, TERM_LIST[0]);
       body.addSpacer(5);
-      smallRow(body, "DÄREFTER", TERM_LIST[1]);
+      smallRow(body, "", TERM_LIST[1]);
     } else {
       smallRow(body, "NORR", nl[0]);
       body.addSpacer(5);
