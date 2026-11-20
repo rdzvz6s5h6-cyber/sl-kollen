@@ -400,7 +400,7 @@ head.size = new Size(0, 36); // fast höjd så att iOS inte pressar ihop headern
 head.centerAlignContent();
 
 // Samma uppskattade widgetbredd som linjewidgetarna (skärmbredd - 55), så innehållet aldrig blir bredare än widgeten
-const COLW = Math.floor((Device.screenSize().width - 55 - 24 - 13) / 2);
+const COLW = Math.floor((Device.screenSize().width - 50 - 24 - 13) / 2); // vänster kolumn; höger kolumn tar resten av bredden
 if (groups && !error) {
   const band = w.addStack();
   band.backgroundColor = new Color("#1c1c1e");
@@ -408,12 +408,14 @@ if (groups && !error) {
   groups.forEach((g, gi) => {
     if (gi) band.addSpacer(13);
     const bc = band.addStack();
-    bc.size = new Size(COLW, 0);
+    if (gi === 0) bc.size = new Size(COLW, 0);
     const ht = bc.addText(heads[gi]);
     ht.font = Font.mediumSystemFont(10);
     ht.textColor = Color.gray();
     ht.lineLimit = 1;
     ht.minimumScaleFactor = 0.6;
+    ht.leftAlignText();
+    bc.addSpacer();
   });
   band.addSpacer();
 } else if (oneHead && !error) {
@@ -550,7 +552,7 @@ if (error) {
     }
     const col = cols.addStack();
     col.layoutVertically();
-    col.size = new Size(colW, 0);
+    if (gi === 0) col.size = new Size(colW, 0);
     g.forEach(({ d, i }) => {
       const row = col.addStack();
       row.centerAlignContent();
@@ -573,13 +575,13 @@ if (error) {
       const ds = row.addStack();
       ds.size = new Size(colW - bw - MINW - 10, 0);
       const dt = ds.addText(shortName(d.destination));
-      dt.font = Font.mediumSystemFont(10);
+      dt.font = Font.mediumSystemFont(12);
       dt.textColor = Color.white();
       dt.lineLimit = 1;
-      dt.minimumScaleFactor = 0.75;
+      dt.minimumScaleFactor = 0.6; // korta namn behåller stor stil, långa krymper
       dt.leftAlignText();
       ds.addSpacer();
-      row.addSpacer(5);
+      row.addSpacer(); // flexibel: minuterna hamnar vid kolumnens högerkant
       // Minuter som färgad text: grön i tid, gul 3+ min sen, röd 6+ min sen eller inställd
       const ms = row.addStack();
       ms.size = new Size(MINW, 0);
