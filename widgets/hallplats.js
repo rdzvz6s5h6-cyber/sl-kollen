@@ -323,19 +323,23 @@ content.setPadding(6, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
 const top = content.addStack();
 top.centerAlignContent();
 // Märket ritas som en bild så att bokstaven hamnar exakt i mitten
-function modeBox(parent, d, w, h, fs) {
-  const mb = parent.addStack();
-  mb.backgroundColor = new Color("#2c2c2e");
-  mb.cornerRadius = 5;
-  mb.size = new Size(w, h);
-  mb.centerAlignContent();
-  mb.addSpacer();
-  const mt = mb.addText(modeLetter(d));
-  mt.font = Font.mediumSystemFont(fs);
-  mt.textColor = Color.lightGray();
-  mt.lineLimit = 1;
-  mt.minimumScaleFactor = 0.7;
-  mb.addSpacer();
+function modeLogo(parent, d, size) {
+  const N = 96;
+  const dc = new DrawContext();
+  dc.size = new Size(N, N);
+  dc.opaque = false;
+  dc.respectScreenScale = false;
+  dc.setFillColor(new Color(badgeColor(d)));
+  dc.fillEllipse(new Rect(0, 0, N, N));
+  dc.setStrokeColor(new Color("#ffffff", 0.6));
+  dc.setLineWidth(5);
+  dc.strokeEllipse(new Rect(3, 3, N - 6, N - 6));
+  dc.setTextColor(Color.white());
+  dc.setFont(Font.boldSystemFont(modeLetter(d).length > 1 ? 40 : 54));
+  dc.setTextAlignedCenter();
+  dc.drawTextInRect(modeLetter(d), new Rect(0, modeLetter(d).length > 1 ? 24 : 15, N, N - 15));
+  const im = parent.addImage(dc.getImage());
+  im.imageSize = new Size(size, size);
 }
 function lineBadge(letter, color) {
   const N = 96;
@@ -485,11 +489,11 @@ if (error) {
       const top2 = right.addStack();
       top2.centerAlignContent();
       const num0 = String((d.line && d.line.designation) || "");
-      if (MULTI) { modeBox(top2, d, 22, 20, 11); top2.addSpacer(4); }
+      if (MULTI) { modeLogo(top2, d, 18); top2.addSpacer(3); }
       const lb0 = top2.addStack();
       lb0.backgroundColor = new Color(badgeColor(d));
       lb0.cornerRadius = 6;
-      lb0.size = new Size(num0.length > 3 ? 46 : 38, 20);
+      lb0.size = new Size(MULTI ? (num0.length > 3 ? 36 : 32) : (num0.length > 3 ? 46 : 38), 20);
       lb0.centerAlignContent();
       lb0.addSpacer();
       const nt0 = lb0.addText(num0);
@@ -498,12 +502,12 @@ if (error) {
       nt0.lineLimit = 1;
       nt0.minimumScaleFactor = 0.7;
       lb0.addSpacer();
-      if (!MULTI && lage0 && platsEtikett(d)) {
-        top2.addSpacer(4);
+      if (lage0 && platsEtikett(d)) {
+        top2.addSpacer(MULTI ? 3 : 4);
         const lg0 = top2.addStack();
         lg0.backgroundColor = new Color("#2c2c2e");
         lg0.cornerRadius = 6;
-        lg0.size = new Size(22, 20);
+        lg0.size = new Size(MULTI ? 18 : 22, 20);
         lg0.centerAlignContent();
         lg0.addSpacer();
         const lt0 = lg0.addText(lage0);
@@ -527,7 +531,7 @@ if (error) {
     row.addSpacer(big ? 5 : 11); // översta pillen är bredare; lika startpunkt för linjenumren
     // linjenummer i en liten färgad ruta (fast bredd, siffrorna centrerade)
     const num = String((d.line && d.line.designation) || "");
-    if (MULTI && !SMALL) { modeBox(row, d, 24, 24, 12); row.addSpacer(4); }
+    if (MULTI && !SMALL) { modeLogo(row, d, 24); row.addSpacer(4); }
     const NW = SMALL ? 38 : (num.length > 3 ? 52 : 44);
     const lb = row.addStack();
     lb.backgroundColor = new Color(badgeColor(d));
