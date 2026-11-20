@@ -14,8 +14,11 @@ Widgets för iPhone som visar nästa avgångar från din närmaste SL-station el
 
 Storlekar: liten, mellan och stor.
 
-## Multi – väljer själv
-`Multi.js` hittar din närmaste station eller hållplats och visar alla avgångar därifrån i tidsordning. Station gäller tåg, tunnelbana, spårvagn och båt, hållplats gäller bussar. Brickan har linjens färg, och platsen visas som Spår, Läge eller Brygga. Det är den enklaste widgeten att börja med.
+## Närmast – väljer själv
+`Narmast.js` hittar din närmaste station eller hållplats och visar alla avgångar därifrån i tidsordning. Station gäller tåg, tunnelbana, spårvagn och båt, hållplats gäller bussar. Varje rad har en rund logga i trafikslagets färg (T, B, P, S, Bt), och platsen visas som Spår, Läge eller Brygga. Det är den enklaste widgeten att börja med.
+
+## Vald station – du väljer själv
+`Vald-station.js` visar alla avgångar från en station du bestämmer, till exempel vid jobbet eller skolan. Lägg ut widgeten, håll in den, välj Redigera widget och skriv stationens namn i fältet Parameter, till exempel Årstaberg. Kör skriptet i Scriptable en gång först.
 
 ## Egna widgets per linje
 Vill du ha en widget som alltid visar samma färdsätt finns de här:
@@ -44,9 +47,9 @@ Vill du ha flera linjer gör du ett skript per linje. Lägg widgetarna i en iOS-
 - Pillerna visar minuter kvar. Grön är i tid, gul är försenad och röd är mycket försenad eller inställd.
 - Längst ner står trafikläget. Grön text betyder inga störningar, gul är en störning.
 - Stationen väljs automatiskt utifrån din plats.
-- Buss, båt och Multi visar en lista över alla linjer från platsen i tidsordning, med linjenumret bredvid. Blåbussar har blå bricka och övriga bussar röd.
+- Buss, båt, Närmast och Vald station visar en lista över alla linjer från platsen i tidsordning, med linjenumret bredvid. Blåbussar har blå bricka och övriga bussar röd.
 - Platsen står i en liten ruta: Spår för tåg och tunnelbana, Läge för buss och Brygga för båt.
-- Stor buss- och Multi-widget visar upp till 10 avgångar. Finns det störningar visas de i sin helhet och tar då plats från de sista avgångarna.
+- Stor buss-, Närmast- och Vald station-widget visar upp till 10 avgångar. Finns det störningar visas de i sin helhet och tar då plats från de sista avgångarna.
 
 ## Status
 Alla utom två är provade mot riktig data:

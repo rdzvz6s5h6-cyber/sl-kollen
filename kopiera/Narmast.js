@@ -1,4 +1,4 @@
-// SL-kollen – Multi – närmaste plats, alla färdsätt (buss, tunnelbana, tåg, spårväg, båt)
+// SL-kollen – Närmast: avgångar från din närmaste SL-station eller hållplats (alla trafikslag)
 // Kopiera hela filen till ett nytt skript i Scriptable. Inget behöver ändras.
 const LINJE = "multi";
 
