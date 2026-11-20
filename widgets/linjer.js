@@ -160,7 +160,7 @@ const isRed = d => {
 };
 
 // Returnerar bara röda linjens avgångar. null = kunde inte hämta.
-async function fetchOne(id, mode) {
+async function fetchOnce(id, mode) {
   const req = new Request(`${BASE}/sites/${id}/departures?transport=${mode}`);
   req.timeoutInterval = 10;
   try {
@@ -172,9 +172,14 @@ async function fetchOne(id, mode) {
     return null;
   }
 }
+// Ett nytt försök om första anropet misslyckas (flera widgets uppdateras samtidigt)
+async function fetchOne(id, mode) {
+  return (await fetchOnce(id, mode)) || (await fetchOnce(id, mode));
+}
 
 // Returnerar bara linjens avgångar. null = kunde inte hämta.
 // Roslagsbanan rapporteras av SL som både TRAIN och TRAM, så den frågar båda.
+// Misslyckas något av anropen och inget tåg hittas räknas det som fel, inte som "inga tåg".
 async function fetchTrains(id) {
   const parts = await Promise.all((CFG.fetchModes || [CFG.transport]).map(m => fetchOne(id, m)));
   const ok = parts.filter(p => p);
@@ -184,7 +189,9 @@ async function fetchTrains(id) {
     const l = d.line || {};
     SEEN.add(`${l.designation || "?"}/${l.group_of_lines || "?"}`);
   });
-  return all.filter(isRed);
+  const mine = all.filter(isRed);
+  if (mine.length === 0 && ok.length < parts.length) return null;
+  return mine;
 }
 
 // kind: "ok" (inga störningar, grön), "bad" (störning, gul), "fail" (kunde inte hämtas, grå)
