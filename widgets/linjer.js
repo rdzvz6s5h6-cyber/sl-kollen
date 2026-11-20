@@ -132,6 +132,8 @@ const shortName = n => String(n)
   .replace(/^Stockholms? södra( station)?$/i, "Sthlm S")
   .replace(/^Stockholm City$/i, "Sthlm City")
   .replace(/^Kungsträdgården$/i, "Kungsträd.")
+  .replace(/^Hammarbyhöjden$/i, "Hammarbyh.")
+  .replace(/^Danderyds sjukhus$/i, "Danderyds sj.")
   .replace(/\s+centrum$/i, " C")
   .replace(/\s+strand$/i, " str.")
   .replace(/\s+brygga$/i, " br.")
@@ -376,7 +378,7 @@ function column(parent, title, list, colW) {
       row.addSpacer(3);
     }
     const destW = colW - 38 - 4 - (lineNo ? 27 : 0) - (spar ? 19 : 0);
-    const dFs = fitSize(dName, destW * 0.85, 8.5, 15); // 15 % marginal: riktig textbredd är större än tabellens
+    const dFs = fitSize(dName, destW * 0.8, 8.5, 15); // Texten klipps redan vid ca 55 av 64 pt (uppmätt via Namnprov), därför 0,8
     const ds = row.addStack();
     ds.size = new Size(destW, 0);
     const dest = ds.addText(dName);
@@ -384,7 +386,7 @@ function column(parent, title, list, colW) {
     dest.textColor = Color.white();
     dest.lineLimit = 1;
     // Ingen autokrympning när namnet ryms (annars krymper iOS texten i mellan men inte i stor). Bara om det inte ryms ens på minsta storlek.
-    dest.minimumScaleFactor = emWidth(dName) * dFs > destW * 0.85 ? 0.75 : 1;
+    dest.minimumScaleFactor = emWidth(dName) * dFs > destW * 0.8 ? 0.75 : 1;
     dest.leftAlignText();
     ds.addSpacer();
     if (spar) {
@@ -560,8 +562,8 @@ function smallRow(parent, title, item) {
 }
 
 // Teckenbredd (i em, SF Medium) per bokstav, så att textstorleken kan räknas ut för varje namn
-const EMW = { a:.55,b:.58,c:.53,d:.58,e:.55,f:.31,g:.58,h:.56,i:.25,j:.25,k:.52,l:.25,m:.87,n:.56,o:.58,p:.58,q:.58,r:.35,s:.5,t:.33,u:.56,v:.5,w:.78,x:.5,y:.5,z:.48,"å":.55,"ä":.55,"ö":.58,"é":.55," ":.26,"-":.35,".":.27,"/":.3,
-  A:.67,B:.63,C:.7,D:.7,E:.57,F:.55,G:.72,H:.72,I:.28,J:.5,K:.64,L:.53,M:.87,N:.73,O:.76,P:.6,Q:.76,R:.63,S:.6,T:.58,U:.7,V:.64,W:.95,X:.63,Y:.6,Z:.6,"Å":.67,"Ä":.67,"Ö":.76 };
+const EMW = { a:.543,b:.593,c:.547,d:.593,e:.57,f:.318,g:.593,h:.585,i:.243,j:.243,k:.523,l:.243,m:.873,n:.585,o:.595,p:.593,q:.593,r:.364,s:.506,t:.355,u:.585,v:.52,w:.77,x:.507,y:.52,z:.48,"å":.543,"ä":.543,"ö":.595,"é":.57," ":.28,"-":.35,".":.28,"/":.3,
+  A:.69,B:.64,C:.73,D:.76,E:.58,F:.56,G:.77,H:.75,I:.29,J:.5,K:.65,L:.54,M:.88,N:.76,O:.79,P:.62,Q:.79,R:.65,S:.63,T:.61,U:.75,V:.67,W:.98,X:.65,Y:.63,Z:.62,"Å":.69,"Ä":.69,"Ö":.79 };
 function emWidth(s) {
   let t = 0;
   for (const ch of String(s)) t += EMW[ch] !== undefined ? EMW[ch] : 0.6;
