@@ -339,13 +339,13 @@ function column(parent, title, list, colW) {
       lb.cornerRadius = 4;
       lb.backgroundColor = new Color(CFG.color);
       lb.centerAlignContent();
-      lb.addSpacer();
+      const lfs = lineNo.length > 2 ? 9 : 10;
+      // Centreras med marginal, inte mellanrum: iOS pressar ihop text i små rutor med mellanrum
+      lb.setPadding(0, Math.max(1, Math.round((24 - lineNo.length * lfs * 0.62) / 2)), 0, 0);
       const lt = lb.addText(lineNo);
-      lt.font = Font.boldSystemFont(lineNo.length > 2 ? 9 : 10);
+      lt.font = Font.boldSystemFont(lfs);
       lt.textColor = CFG.letterColor ? new Color(CFG.letterColor) : Color.white();
       lt.lineLimit = 1;
-      lt.minimumScaleFactor = 0.7;
-      lb.addSpacer();
       row.addSpacer(3);
     }
     const destW = colW - 38 - 4 - (lineNo ? 27 : 0) - (spar ? 19 : 0);
@@ -358,6 +358,7 @@ function column(parent, title, list, colW) {
     dest.lineLimit = 1;
     dest.minimumScaleFactor = 0.8; // bara säkerhetsnät om namnet ändå är för brett
     dest.leftAlignText();
+    ds.addSpacer();
     if (spar) {
       row.addSpacer(3);
       const sb = row.addStack();
@@ -365,13 +366,12 @@ function column(parent, title, list, colW) {
       sb.cornerRadius = 4;
       sb.backgroundColor = new Color("#2c2c2e");
       sb.centerAlignContent();
-      sb.addSpacer();
+      const sfs = spar.length > 1 ? 9 : 10;
+      sb.setPadding(0, Math.max(1, Math.round((16 - spar.length * sfs * 0.62) / 2)), 0, 0);
       const st = sb.addText(spar);
-      st.font = Font.boldSystemFont(spar.length > 1 ? 9 : 10);
+      st.font = Font.boldSystemFont(sfs);
       st.textColor = new Color("#aeaeb2");
       st.lineLimit = 1;
-      st.minimumScaleFactor = 0.7;
-      sb.addSpacer();
     }
     col.addSpacer(3);
   });
