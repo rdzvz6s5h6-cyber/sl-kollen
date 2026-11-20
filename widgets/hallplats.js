@@ -357,7 +357,7 @@ if (BUSVIEW && !SMALL) {
     const ln = linesOf(g);
     const lt = ln.length > 1 ? ln.join(", ") : `Linje ${ln[0]}`;
     if (lg(g)) return `Läge ${lg(g)} · ${lt}`;
-    return i === undefined ? lt : `Läge ${String.fromCharCode(65 + i)} · ${lt}`;
+    return i === undefined ? `Linje ${ln.join(", ")}` : `Läge ${String.fromCharCode(65 + i)} · ${lt}`;
   };
   if (!gm.has("") && gm.size === 1) {
     oneHead = mkHead([...gm.values()][0]);
