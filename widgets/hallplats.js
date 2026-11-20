@@ -722,7 +722,7 @@ if (error) {
       dest.font = destFont;
       dest.textColor = Color.white();
       dest.lineLimit = 1;
-      dest.minimumScaleFactor = 0.6;
+      dest.minimumScaleFactor = 0.9;
       if (lage && platsEtikett(d) && !oneHead) {
         row.addSpacer();
         const lg = row.addStack();

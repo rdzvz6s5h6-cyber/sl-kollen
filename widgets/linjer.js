@@ -323,7 +323,7 @@ function column(parent, title, list, colW) {
     dest.font = big ? Font.boldSystemFont(16) : Font.mediumSystemFont(15);
     dest.textColor = Color.white();
     dest.lineLimit = 1;
-    dest.minimumScaleFactor = 0.6;
+    dest.minimumScaleFactor = 0.9;
     col.addSpacer(3);
   });
 }
