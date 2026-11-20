@@ -367,7 +367,7 @@ function column(parent, title, list, colW) {
       sb.backgroundColor = new Color("#2c2c2e");
       sb.centerAlignContent();
       const sfs = spar.length > 1 ? 9 : 10;
-      sb.setPadding(0, Math.max(1, Math.round((16 - spar.length * sfs * 0.62) / 2)), 0, 0);
+      sb.setPadding(0, Math.max(1, Math.round((16 - spar.length * sfs * 0.62) / 2 - 1.5)), 0, 0);
       const st = sb.addText(spar);
       st.font = Font.boldSystemFont(sfs);
       st.textColor = new Color("#aeaeb2");
