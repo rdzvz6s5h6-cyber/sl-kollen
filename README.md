@@ -60,8 +60,12 @@ Vill du ha flera linjer gör du ett skript per linje. Lägg widgetarna i en iOS-
 - Rubrikerna är NORR och SÖDER för tunnelbana, pendeltåg och Roslagsbanan. Övriga banor har "Mot ändstation", till exempel MOT NOCKEBY och MOT ALVIK.
 - På en ändstation, där tågen bara går åt ett håll, delas tågen i två kolumner i tidsordning i stället för en tom kolumn.
 - Buss, båt, Närmast station och Hela stationen visar en lista över alla linjer från platsen i tidsordning, med linjenumret bredvid. Blåbussar har blå bricka och övriga bussar röd.
+- Långa stationsnamn förkortas (till exempel Sthlm Ö, Mörby C, Farsta str.) och textstorleken räknas ut per namn, så att inget klipps. Storleken är kalibrerad mot riktiga skärmdumpar.
 - Platsen står i en liten ruta: Spår för tåg och tunnelbana, Läge för buss och Brygga för båt.
 - Stor buss-, Närmast station- och Hela stationen-widget visar upp till 10 avgångar. Finns det störningar visas de i sin helhet och tar då plats från de sista avgångarna.
+
+## Namnprov
+`Namnprov.js` (i `kopiera/`) är ett testskript som ritar 60 stationsnamn i de riktiga raderna, så att du kan kontrollera att inget namn klipps på just din telefon. Kör det i Scriptable och välj sida 1, 2 eller 3. Det påverkar inga andra widgets.
 
 ## Status
 Alla utom två är provade mot riktig data:
