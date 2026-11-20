@@ -319,11 +319,15 @@ function column(parent, title, list, colW) {
     row.centerAlignContent();
     pill(row, i, big);
     row.addSpacer(5);
-    const dest = row.addText(shortName(d.destination));
-    dest.font = big ? Font.boldSystemFont(16) : Font.mediumSystemFont(15);
+    const dName = shortName(d.destination);
+    // Storlek räknas ut efter ordets längd (max 15). iOS autokrympning gav för liten text i medium.
+    const dEm = dName.length * 0.45 + 0.2 * (dName.match(/[mMwW]/g) || []).length;
+    const dFs = Math.max(10, Math.min(15, Math.floor((colW - 55) * 0.97 / dEm)));
+    const dest = row.addText(dName);
+    dest.font = Font.mediumSystemFont(dFs);
     dest.textColor = Color.white();
     dest.lineLimit = 1;
-    dest.minimumScaleFactor = 0.9;
+    dest.minimumScaleFactor = 1;
     col.addSpacer(3);
   });
 }
