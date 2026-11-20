@@ -122,7 +122,19 @@ const min = (a, b) => Math.round((a - b) / 60000);
 const shortName = n => String(n)
   .replace(/^Upplands Väsby$/i, "Upl. Väsby")
   .replace(/^Stockholms? östra( station)?$/i, "Sthlm Ö")
-  .replace(/\s+centrum$/i, " C");
+  .replace(/^Stockholms? södra( station)?$/i, "Sthlm S")
+  .replace(/^Stockholm City$/i, "Sthlm City")
+  .replace(/^Kungsträdgården$/i, "Kungsträd.")
+  .replace(/\s+centrum$/i, " C")
+  .replace(/\s+strand$/i, " str.")
+  .replace(/\s+brygga$/i, " br.")
+  .replace(/\s+station$/i, " st.")
+  .replace(/\s+sjukhus$/i, " sjukh.")
+  .replace(/\s+östra$/i, " Ö")
+  .replace(/\s+västra$/i, " V")
+  .replace(/\s+norra$/i, " N")
+  .replace(/\s+södra$/i, " S");
+
 
 function readJSON(p) {
   try { return fm.fileExists(p) ? JSON.parse(fm.readString(p)) : null; }
