@@ -400,7 +400,8 @@ head.setPadding(6, SMALL ? 10 : 12, 6, SMALL ? 10 : 12);
 head.size = new Size(0, 36); // fast höjd så att iOS inte pressar ihop headern i medium
 head.centerAlignContent();
 
-const COLW = Math.floor((Math.min(Device.screenSize().width - 32, 360) - 24 - 13) / 2);
+// Samma uppskattade widgetbredd som linjewidgetarna (skärmbredd - 55), så innehållet aldrig blir bredare än widgeten
+const COLW = Math.floor((Device.screenSize().width - 55 - 24 - 13) / 2);
 if (groups && !error) {
   const band = w.addStack();
   band.backgroundColor = new Color("#1c1c1e");
@@ -569,7 +570,7 @@ if (error) {
       nt.minimumScaleFactor = 0.7;
       lb.addSpacer();
       row.addSpacer(5);
-      const MINW = 40;
+      const MINW = 44;
       const ds = row.addStack();
       ds.size = new Size(colW - bw - MINW - 10, 0);
       const dt = ds.addText(shortName(d.destination));
@@ -577,6 +578,8 @@ if (error) {
       dt.textColor = Color.white();
       dt.lineLimit = 1;
       dt.minimumScaleFactor = 0.75;
+      dt.leftAlignText();
+      ds.addSpacer();
       row.addSpacer(5);
       // Minuter som färgad text: grön i tid, gul 3+ min sen, röd 6+ min sen eller inställd
       const ms = row.addStack();
@@ -589,6 +592,7 @@ if (error) {
       mt.font = Font.boldSystemFont(i.cancelled ? 10 : 14);
       mt.textColor = mc;
       mt.lineLimit = 1;
+      mt.minimumScaleFactor = 0.7;
       if (!i.cancelled && i.left > 0) {
         ms.addSpacer(1);
         const mu = ms.addText("min");
