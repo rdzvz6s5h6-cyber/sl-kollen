@@ -321,13 +321,12 @@ function column(parent, title, list, colW) {
     row.addSpacer(5);
     const dName = shortName(d.destination);
     // Storlek räknas ut efter ordets längd (max 15). iOS autokrympning gav för liten text i medium.
-    const dEm = dName.length * 0.45 + 0.2 * (dName.match(/[mMwW]/g) || []).length;
-    const dFs = Math.max(10, Math.min(15, Math.floor((colW - 55) * 0.97 / dEm)));
+    const dFs = fitSize(dName, (colW - 55) * 0.97, 10, 15);
     const dest = row.addText(dName);
     dest.font = Font.mediumSystemFont(dFs);
     dest.textColor = Color.white();
     dest.lineLimit = 1;
-    dest.minimumScaleFactor = 1;
+    dest.minimumScaleFactor = 0.8; // bara säkerhetsnät om namnet ändå är för brett
     col.addSpacer(3);
   });
 }
@@ -389,6 +388,20 @@ function smallRow(parent, title, item) {
   dest.textColor = Color.white();
   dest.lineLimit = 1;
   dest.minimumScaleFactor = 0.6;
+}
+
+// Teckenbredd (i em, SF Medium) per bokstav, så att textstorleken kan räknas ut för varje namn
+const EMW = { a:.55,b:.58,c:.53,d:.58,e:.55,f:.31,g:.58,h:.56,i:.25,j:.25,k:.52,l:.25,m:.87,n:.56,o:.58,p:.58,q:.58,r:.35,s:.5,t:.33,u:.56,v:.5,w:.78,x:.5,y:.5,z:.48,"å":.55,"ä":.55,"ö":.58,"é":.55," ":.26,"-":.35,".":.27,"/":.3,
+  A:.67,B:.63,C:.7,D:.7,E:.57,F:.55,G:.72,H:.72,I:.28,J:.5,K:.64,L:.53,M:.87,N:.73,O:.76,P:.6,Q:.76,R:.63,S:.6,T:.58,U:.7,V:.64,W:.95,X:.63,Y:.6,Z:.6,"Å":.67,"Ä":.67,"Ö":.76 };
+function emWidth(s) {
+  let t = 0;
+  for (const ch of String(s)) t += EMW[ch] !== undefined ? EMW[ch] : 0.6;
+  return t;
+}
+// Största storlek (steg om 0,5) där namnet ryms i bredden avail
+function fitSize(s, avail, min, max) {
+  const fs = Math.floor((avail / emWidth(s)) * 2) / 2;
+  return Math.max(min, Math.min(max, fs));
 }
 
 const w = new ListWidget();

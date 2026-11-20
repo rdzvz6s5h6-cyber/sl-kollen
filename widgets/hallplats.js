@@ -379,6 +379,20 @@ const fullN = LARGE && status && status.kind === "bad" ? Math.min(status.items.l
 if (fullN && groups) groups = groups.map(g => g.slice(0, Math.max(3, g.length - fullN)));
 else if (fullN) shown = shown.slice(0, Math.max(3, ROWS - fullN));
 
+// Teckenbredd (i em, SF Medium) per bokstav, så att textstorleken kan räknas ut för varje namn
+const EMW = { a:.55,b:.58,c:.53,d:.58,e:.55,f:.31,g:.58,h:.56,i:.25,j:.25,k:.52,l:.25,m:.87,n:.56,o:.58,p:.58,q:.58,r:.35,s:.5,t:.33,u:.56,v:.5,w:.78,x:.5,y:.5,z:.48,"å":.55,"ä":.55,"ö":.58,"é":.55," ":.26,"-":.35,".":.27,"/":.3,
+  A:.67,B:.63,C:.7,D:.7,E:.57,F:.55,G:.72,H:.72,I:.28,J:.5,K:.64,L:.53,M:.87,N:.73,O:.76,P:.6,Q:.76,R:.63,S:.6,T:.58,U:.7,V:.64,W:.95,X:.63,Y:.6,Z:.6,"Å":.67,"Ä":.67,"Ö":.76 };
+function emWidth(s) {
+  let t = 0;
+  for (const ch of String(s)) t += EMW[ch] !== undefined ? EMW[ch] : 0.6;
+  return t;
+}
+// Största storlek (steg om 0,5) där namnet ryms i bredden avail
+function fitSize(s, avail, min, max) {
+  const fs = Math.floor((avail / emWidth(s)) * 2) / 2;
+  return Math.max(min, Math.min(max, fs));
+}
+
 const w = new ListWidget();
 w.backgroundColor = Color.black();
 w.setPadding(0, 0, 0, 0);
@@ -570,12 +584,10 @@ if (error) {
       const dsW = colW - bw - MINW - 13;
       ds.size = new Size(dsW, 0);
       const dName = shortName(d.destination);
-      // Storlek efter ordets längd: korta namn stort, långa mindre. iOS krymper annars hårt när något är för brett.
-      // Bredd i em ungefär 0,45 per tecken, m och w är bredare (kalibrerat mot riktig rendering). 3 % marginal.
-      const dEm = dName.length * 0.45 + 0.2 * (dName.match(/[mMwW]/g) || []).length;
+      // Storlek efter ordets verkliga bredd (tabell per bokstav), 2 % marginal. Korta namn stort, långa mindre.
       // AUTOFIT: sant = alla namn storlek 15 och iOS krymper de långa själv. Falskt = storleken räknas ut i förväg.
       const AUTOFIT = false;
-      const dFs = AUTOFIT ? 15 : Math.max(9, Math.min(14, Math.floor(dsW * 0.93 / dEm)));
+      const dFs = AUTOFIT ? 15 : fitSize(dName, dsW * 0.98, 9, 14);
       const dt = ds.addText(dName);
       dt.font = Font.mediumSystemFont(dFs);
       dt.textColor = Color.white();
