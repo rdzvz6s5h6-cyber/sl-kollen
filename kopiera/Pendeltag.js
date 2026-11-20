@@ -1,5 +1,9 @@
 // SL-kollen – Pendeltåg
 // Kopiera hela filen till ett nytt skript i Scriptable. Inget behöver ändras.
+// Valfritt: skriv en station mellan citattecknen för att låsa widgeten till den. Tomt = närmaste station.
+// Du kan också skriva stationen i widgetens Parameter, eller välja i appen när du kör skriptet.
+const STATION = "";
+
 const URL = "https://raw.githubusercontent.com/rdzvz6s5h6-cyber/SL-kollen/main/widgets/pendeltag.js";
 
 const fm = FileManager.local();
@@ -29,5 +33,5 @@ if (!code) {
   Script.complete();
 } else {
   const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-  await new AsyncFunction(code)();
+  await new AsyncFunction("SL_STATION", code)(STATION);
 }

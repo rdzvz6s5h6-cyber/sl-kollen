@@ -350,7 +350,68 @@ function isNorth(d) {
   return d.direction_code === 2;
 }
 
-const res = await resolve();
+// Valfri låst station. Ordning: Parameter på widgeten, STATION överst i skriptet, sparat val i appen.
+// Inget valt = närmaste station (automatiskt). Låst visas med ett lås i headern, automatiskt med en måltavla.
+async function resolveFixed() {
+  const KEY = CFG.key;
+  const LABEL = CFG.label;
+  const namePath = fm.joinPath(dir, `sl_station_${KEY}.txt`);
+  const PARAM = String(args.widgetParameter || "").trim();
+  const CONST = typeof SL_STATION !== "undefined" ? String(SL_STATION || "").trim() : "";
+  const saved = fm.fileExists(namePath) ? fm.readString(namePath).trim() : "";
+  let name = PARAM || CONST || saved;
+  if (!config.runsInWidget && !PARAM && !CONST) {
+    const m = new Alert();
+    m.title = saved ? `Låst station: ${saved}` : "Station: närmaste (automatisk)";
+    m.message = saved
+      ? "Widgeten på hemskärmen visar den här stationen om du inte skrivit något i dess Parameter."
+      : "Widgeten väljer närmaste station. Du kan också låsa den till en egen station.";
+    m.addAction("Visa widget");
+    m.addAction("Välj station");
+    if (saved) m.addAction("Närmaste station");
+    const r = await m.presentAlert();
+    if (r === 1) {
+      const a = new Alert();
+      a.title = "Vilken station?";
+      a.message = "Skriv namnet, till exempel Stockholms östra.";
+      a.addTextField("Stationens namn");
+      a.addAction("Spara");
+      await a.presentAlert();
+      const v = String(a.textFieldValue(0) || "").trim();
+      if (v) { fm.writeString(namePath, v); name = v; }
+    } else if (r === 2) {
+      fm.remove(namePath);
+      name = "";
+    }
+  }
+  if (!name) return null;
+  const n = norm(name);
+  const lp = fm.joinPath(dir, `sl_fast_${KEY}_${n.replace(/[^a-z0-9åäö]/g, "_")}.json`);
+  const last = readJSON(lp);
+  if (last) return { st: last, note: "", locked: true };
+  const sites = await loadSites();
+  if (!sites) return { error: "Kör skriptet i appen en gång", locked: true };
+  const words = n.split(" ").filter(Boolean);
+  const rank = x => {
+    const m = norm(x[1]);
+    if (m === n) return 0;
+    if (m.startsWith(n)) return 1;
+    if (m.includes(n)) return 2;
+    return words.length > 1 && words.every(w => m.includes(w)) ? 3 : 9;
+  };
+  const cand = sites.filter(x => rank(x) < 9)
+    .sort((a, b) => rank(a) - rank(b) || String(a[1]).length - String(b[1]).length).slice(0, 5);
+  if (!cand.length) return { error: `Hittade ingen station som heter "${name}"`, locked: true };
+  const results = await Promise.all(cand.map(x => fetchTrains(x[0])));
+  const pick = results.findIndex(r => r && r.length > 0);
+  if (pick < 0) return { error: `Inga avgångar för ${LABEL} vid "${name}"`, locked: true };
+  const x = cand[pick];
+  const st = { id: x[0], name: x[1], lat: x[2], lon: x[3] };
+  fm.writeString(lp, JSON.stringify(st));
+  return { st, deps: results[pick], note: "", locked: true };
+}
+
+const res = (await resolveFixed()) || await resolve();
 let deps = res.deps;
 let error = res.error;
 const statusP = loadStatus();
@@ -471,6 +532,10 @@ t1.lineLimit = 1;
 t1.minimumScaleFactor = 0.7;
 const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 top.addSpacer();
+const modeIc = top.addImage(SFSymbol.named(res.locked ? "lock.fill" : "scope").image);
+modeIc.imageSize = new Size(11, 11);
+modeIc.tintColor = HEAD_FG_SOFT;
+if (!SMALL) top.addSpacer(8);
 if (!SMALL) {
   const right = top.addStack();
   right.layoutVertically();

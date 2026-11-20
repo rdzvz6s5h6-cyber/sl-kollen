@@ -2,6 +2,10 @@
 // Kopiera hela filen till ett nytt skript i Scriptable. Inget behöver ändras.
 const LINJE = "roslagsbanan";
 
+// Valfritt: skriv en station mellan citattecknen för att låsa widgeten till den. Tomt = närmaste station.
+// Du kan också skriva stationen i widgetens Parameter, eller välja i appen när du kör skriptet.
+const STATION = "";
+
 const URL = "https://raw.githubusercontent.com/rdzvz6s5h6-cyber/SL-kollen/main/widgets/linjer.js";
 
 const fm = FileManager.local();
@@ -31,5 +35,5 @@ if (!code) {
   Script.complete();
 } else {
   const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-  await new AsyncFunction("SL_LINJE", code)(LINJE);
+  await new AsyncFunction("SL_LINJE", "SL_STATION", code)(LINJE, STATION);
 }
