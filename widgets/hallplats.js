@@ -292,12 +292,20 @@ function busColor(l) {
   const blue = /blå/i.test(String(l.group_of_lines || "")) || BLUE_BUSES.includes(String(l.designation));
   return blue ? "#1E5AA8" : "#D32F2F";
 }
+// Roslagsbanan kommer från SL som spårvagn (TRAM), så den känns igen på namn eller linjenummer (inte buss 27/28/29).
+function isRoslags(d) {
+  const l = d.line || {};
+  const m = String(l.transport_mode || "").toUpperCase();
+  if (m !== "TRAM" && m !== "TRAIN") return false;
+  return /roslags/i.test(String(l.group_of_lines || "")) || /^(27|28|28S|29)$/.test(String(l.designation));
+}
 function badgeColor(d) {
   const l = d.line || {};
   if (CFG.key === "buss") return busColor(l);
   if (CFG.key !== "multi" && CFG.key !== "vald") return CFG.color;
   const n = String(l.designation), g = String(l.group_of_lines || "");
   const m = String(l.transport_mode || "").toUpperCase();
+  if (isRoslags(d)) return "#8E4A9E";
   if (m === "METRO") {
     if (/röd/i.test(g) || ["13", "14"].includes(n)) return "#E5322D";
     if (/grön/i.test(g) || ["17", "18", "19"].includes(n)) return "#2E9E4F";
@@ -310,6 +318,7 @@ function badgeColor(d) {
 }
 // Bokstav i märket uppe till vänster (multi: efter första avgångens färdsätt)
 function modeLetter(d) {
+  if (isRoslags(d)) return "R";
   const m = String(((d.line || {}).transport_mode) || "").toUpperCase();
   return { METRO: "T", TRAIN: "P", TRAM: "S", SHIP: "Bt", FERRY: "Bt", BUS: "B" }[m] || "SL";
 }
@@ -318,7 +327,7 @@ function modeLetter(d) {
 function platsEtikett(d) {
   const m0 = String(((d.line || {}).transport_mode) || "").toUpperCase();
   const m = m0 || (CFG.key === "buss" ? "BUS" : CFG.key === "bat" ? "SHIP" : "");
-  if (m === "TRAIN" || m === "METRO") return "Spår";
+  if (m === "TRAIN" || m === "METRO" || isRoslags(d)) return "Spår";
   if (m === "BUS") return "Läge";
   if (m === "SHIP" || m === "FERRY") return "Brygga";
   return null;
