@@ -396,14 +396,15 @@ const HEAD_FG_SOFT = new Color(HEAD_FG.hex, 0.8);
 const HEAD_FG_RING = new Color(HEAD_FG.hex, 0.75);
 const head = w.addStack();
 head.backgroundColor = new Color(topColor);
-head.setPadding(7, SMALL ? 10 : 12, 7, SMALL ? 10 : 12);
+head.setPadding(6, SMALL ? 10 : 12, 6, SMALL ? 10 : 12);
+head.size = new Size(0, 36); // fast höjd så att iOS inte pressar ihop headern i medium
 head.centerAlignContent();
 
 const COLW = Math.floor((Math.min(Device.screenSize().width - 32, 360) - 24 - 13) / 2);
 if (groups && !error) {
   const band = w.addStack();
   band.backgroundColor = new Color("#1c1c1e");
-  band.setPadding(4, 12, 4, 12);
+  band.setPadding(3, 12, 3, 12);
   groups.forEach((g, gi) => {
     if (gi) band.addSpacer(13);
     const bc = band.addStack();
@@ -418,7 +419,7 @@ if (groups && !error) {
 } else if (oneHead && !error) {
   const band = w.addStack();
   band.backgroundColor = new Color("#1c1c1e");
-  band.setPadding(4, 12, 4, 12);
+  band.setPadding(3, 12, 3, 12);
   const ot = band.addText(oneHead);
   ot.font = Font.mediumSystemFont(10);
   ot.textColor = Color.gray();
@@ -428,7 +429,7 @@ if (groups && !error) {
 
 const content = w.addStack();
 content.layoutVertically();
-content.setPadding(6, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
+content.setPadding(4, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
 
 const top = head;
 

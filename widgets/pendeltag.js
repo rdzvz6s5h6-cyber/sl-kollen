@@ -266,7 +266,8 @@ const HEAD_FG_SOFT = new Color(HEAD_FG.hex, 0.8);
 const HEAD_FG_RING = new Color(HEAD_FG.hex, 0.75);
 const head = w.addStack();
 head.backgroundColor = new Color(LINE_COLOR);
-head.setPadding(7, SMALL ? 10 : 12, 7, SMALL ? 10 : 12);
+head.setPadding(6, SMALL ? 10 : 12, 6, SMALL ? 10 : 12);
+head.size = new Size(0, 36); // fast höjd så att iOS inte pressar ihop headern i medium
 head.centerAlignContent();
 
 const contentW = Device.screenSize().width - 55 - 24; // uppskattad innehållsbredd
@@ -274,7 +275,7 @@ const colW = Math.floor((contentW - 9) / 2);
 if (!SMALL && !error) {
   const band = w.addStack();
   band.backgroundColor = new Color("#1c1c1e");
-  band.setPadding(4, 12, 4, 12);
+  band.setPadding(3, 12, 3, 12);
   const bt = ["NORR", "SÖDER"];
   bt.forEach((tt, bi) => {
     if (bi) band.addSpacer(9);
@@ -290,7 +291,7 @@ if (!SMALL && !error) {
 
 const content = w.addStack();
 content.layoutVertically();
-content.setPadding(6, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
+content.setPadding(4, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
 
 const top = head;
 
