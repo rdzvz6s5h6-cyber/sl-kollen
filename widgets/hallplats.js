@@ -565,7 +565,7 @@ if (error) {
       nt.minimumScaleFactor = 0.7;
       lb.addSpacer();
       row.addSpacer(5);
-      const MINW = 36;
+      const MINW = 40;
       const ds = row.addStack();
       const dsW = colW - bw - MINW - 13;
       ds.size = new Size(dsW, 0);
@@ -573,12 +573,12 @@ if (error) {
       // Storlek efter ordets längd: korta namn stort, långa mindre. iOS krymper annars hårt när något är för brett.
       // Bredd i em ungefär 0,45 per tecken, m och w är bredare (kalibrerat mot riktig rendering). 3 % marginal.
       const dEm = dName.length * 0.45 + 0.2 * (dName.match(/[mMwW]/g) || []).length;
-      const dFs = Math.max(9, Math.min(15, Math.floor(dsW * 0.97 / dEm)));
+      const dFs = Math.max(9, Math.min(14, Math.floor(dsW * 0.93 / dEm)));
       const dt = ds.addText(dName);
       dt.font = Font.mediumSystemFont(dFs);
       dt.textColor = Color.white();
       dt.lineLimit = 1;
-      dt.minimumScaleFactor = 0.8;
+      dt.minimumScaleFactor = 0.65; // skyddsnät: krymper hellre än klipper med …
       dt.leftAlignText();
       ds.addSpacer();
       row.addSpacer(); // flexibel: minuterna hamnar vid kolumnens högerkant
