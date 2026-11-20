@@ -64,27 +64,37 @@ async function fetchTrains(id) {
   }
 }
 
-// kind: "ok" (inga störningar, grön), "bad" (störning, gul), "fail" (kunde inte hämtas, grå)
-async function loadStatus() {
+// Hämtar alla störningar för pendeltåget. null = kunde inte hämtas.
+async function loadDeviations() {
   const req = new Request("https://deviations.integration.sl.se/v1/messages?transport_mode=TRAIN&future=false");
   req.timeoutInterval = 10;
-  const fail = { text: "Trafikläget kunde inte hämtas", kind: "fail" };
   try {
     const data = await req.loadJSON();
     const code = req.response ? req.response.statusCode : 0;
-    if (code !== 200 || !Array.isArray(data)) return fail;
-    if (data.length === 0) {
-      return { text: "Inga störningar noterade för pendeltåget", kind: "ok" };
-    }
-    const v = data[0].message_variants || [];
-    const sv = v.find(x => x.language === "sv") || v[0] || {};
-    let t = String(sv.header || sv.details || "Störning på pendeltåget")
-      .replace(/\s+/g, " ").trim();
-    if (data.length > 1) t += `\u00A0(+${data.length - 1}\u00A0till)`;
-    return { text: t, kind: "bad" };
+    return code === 200 && Array.isArray(data) ? data : null;
   } catch (e) {
-    return fail;
+    return null;
   }
+}
+
+// kind: "ok" (inga störningar, grön), "bad" (störning, gul), "fail" (kunde inte hämtas, grå)
+// Bara störningar som uttryckligen gäller linjerna som visas. Hissar och entréer räknas inte.
+function buildStatus(data, lines) {
+  if (!data) return { text: "Trafikläget kunde inte hämtas", kind: "fail" };
+  const ACCESS = /entré|entre|ingång|uppgång|hiss|rulltrappa|trappa|biljettspärr|spärr/i;
+  const mine = data.filter(m => {
+    const txt = (m.message_variants || []).map(x => `${x.header || ""} ${x.details || ""}`).join(" ");
+    if (ACCESS.test(txt)) return false;
+    const sc = (m.scope && m.scope.lines) || [];
+    return sc.some(l => lines.includes(String(l.designation)));
+  });
+  if (mine.length === 0) return { text: "Inga störningar noterade för pendeltåget", kind: "ok" };
+  const v = mine[0].message_variants || [];
+  const sv = v.find(x => x.language === "sv") || v[0] || {};
+  let t = String(sv.header || sv.details || "Störning på pendeltåget")
+    .replace(/\s+/g, " ").trim();
+  if (mine.length > 1) t += `\u00A0(+${mine.length - 1}\u00A0till)`;
+  return { text: t, kind: "bad" };
 }
 
 async function resolve() {
@@ -216,12 +226,13 @@ function splitTwo(text, max) {
 const res = await resolve();
 let deps = res.deps;
 let error = res.error;
-const statusP = loadStatus();
+const devP = loadDeviations();
 if (!error && !deps) {
   deps = await fetchTrains(res.st.id);
   if (!deps) error = "Ingen kontakt";
 }
-const status = await statusP;
+const devData = await devP;
+const status = buildStatus(devData, [...new Set((deps || []).map(d => String((d.line && d.line.designation) || "")))]);
 const now = new Date(); // tidpunkten då informationen hämtades
 const stName = res.st ? res.st.name : "";
 const LINE_COLOR = "#EC619F"; // färg på listen och märket
