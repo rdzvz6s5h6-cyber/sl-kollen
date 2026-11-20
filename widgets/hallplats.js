@@ -174,10 +174,15 @@ async function resolve() {
   return { error: CFG.empty };
 }
 
-// Vald station: namnet kommer från widgetens Parameter (eller sparas första gången i appen).
+// Låst station. Vald station kräver ett namn. Buss, Båt och Närmast station har det som tillval:
+// inget namn = närmaste station (resolve), namn = låst till den stationen.
+// Ordning: Parameter på widgeten, STATION överst i skriptet, sparat val i appen.
 async function resolveVald() {
-  const namePath = fm.joinPath(dir, "sl_vald_namn.txt");
+  const OPTIONAL = CFG.key !== "vald";
+  const namePath = fm.joinPath(dir, OPTIONAL ? `sl_station_${CFG.key}.txt` : "sl_vald_namn.txt");
+  const PARAM = String(args.widgetParameter || "").trim();
   const FAST = typeof SL_STATION !== "undefined" ? String(SL_STATION || "").trim() : "";
+  const saved = fm.fileExists(namePath) ? fm.readString(namePath).trim() : "";
   const askName = async (title) => {
     const a = new Alert();
     a.title = title;
@@ -189,41 +194,51 @@ async function resolveVald() {
     if (v) fm.writeString(namePath, v);
     return v;
   };
-  // Ordning: Parameter på widgeten, STATION överst i skriptet, sparat namn
-  let name = String(args.widgetParameter || "").trim() || FAST;
-  if (!name && fm.fileExists(namePath)) name = fm.readString(namePath).trim();
-  if (!config.runsInWidget && !String(args.widgetParameter || "").trim() && !FAST) {
-    // Körs i appen: visa vald station och låt användaren byta den
-    if (name) {
+  let name = PARAM || FAST || saved;
+  if (!config.runsInWidget && !PARAM && !FAST) {
+    // Körs i appen: visa vald station och låt användaren byta eller gå tillbaka till närmaste
+    if (name || OPTIONAL) {
       const m = new Alert();
-      m.title = `Station: ${name}`;
-      m.message = "Widgeten på hemskärmen använder den här stationen om du inte skrivit något i dess Parameter.";
+      m.title = name ? `Låst station: ${name}` : "Station: närmaste (automatisk)";
+      m.message = name
+        ? "Widgeten på hemskärmen använder den här stationen om du inte skrivit något i dess Parameter."
+        : "Widgeten väljer närmaste station. Du kan också låsa den till en egen station.";
       m.addAction("Visa widget");
-      m.addAction("Byt station");
-      if (await m.presentAlert() === 1) name = (await askName("Vilken station?")) || name;
+      m.addAction(name ? "Byt station" : "Välj station");
+      if (name && OPTIONAL) m.addAction("Närmaste station");
+      const r = await m.presentAlert();
+      if (r === 1) name = (await askName("Vilken station?")) || name;
+      else if (r === 2) { fm.remove(namePath); name = ""; }
     } else {
       name = await askName("Vilken station?");
     }
   }
-  if (!name) return { error: "Ange station: håll in widgeten, Redigera widget, Parameter" };
+  if (!name) return OPTIONAL ? null : { error: "Ange station: håll in widgeten, Redigera widget, Parameter" };
   const n = norm(name);
   const lp = fm.joinPath(dir, `sl_last_vald_${n.replace(/[^a-z0-9åäö]/g, "_")}.json`);
   const last = readJSON(lp);
-  if (last) return { st: last, note: "" };
+  if (last) return { st: last, note: "", locked: true };
   const sites = await loadSites();
-  if (!sites) return { error: "Kör skriptet i appen en gång" };
-  const rank = x => { const m = norm(x[1]); return m === n ? 0 : m.startsWith(n) ? 1 : m.includes(n) ? 2 : 9; };
+  if (!sites) return { error: "Kör skriptet i appen en gång", locked: true };
+  const words = n.split(" ").filter(Boolean);
+  const rank = x => {
+    const m = norm(x[1]);
+    if (m === n) return 0;
+    if (m.startsWith(n)) return 1;
+    if (m.includes(n)) return 2;
+    return words.length > 1 && words.every(w => m.includes(w)) ? 3 : 9;
+  };
   const cand = sites.filter(x => rank(x) < 9)
     .sort((a, b) => rank(a) - rank(b) || String(a[1]).length - String(b[1]).length).slice(0, 5);
-  if (!cand.length) return { error: `Hittade ingen station som heter "${name}"` };
+  if (!cand.length) return { error: `Hittade ingen station som heter "${name}"`, locked: true };
   const results = await Promise.all(cand.map(x => fetchDeps(x[0])));
   let pick = results.findIndex(r => r && r.some(d => min(new Date(d.expected || d.scheduled), new Date()) >= -1));
   if (pick < 0) pick = results.findIndex(r => r);
-  if (pick < 0) return { error: `Inga avgångar hittades för "${name}"` };
+  if (pick < 0) return { error: `Inga avgångar hittades för "${name}"`, locked: true };
   const x = cand[pick];
   const st = { id: x[0], name: x[1], lat: x[2], lon: x[3] };
   fm.writeString(lp, JSON.stringify(st));
-  return { st, deps: results[pick], note: "" };
+  return { st, deps: results[pick], note: "", locked: true };
 }
 
 function info(d, now) {
@@ -333,7 +348,7 @@ function platsEtikett(d) {
   return null;
 }
 
-const res = CFG.key === "vald" ? await resolveVald() : await resolve();
+const res = (await resolveVald()) || await resolve();
 let deps = res.deps;
 let error = res.error;
 if (!error && !deps) {
@@ -407,6 +422,7 @@ w.backgroundColor = Color.black();
 w.setPadding(0, 0, 0, 0);
 const first0 = shown[0] && shown[0].d;
 const VALD = CFG.key === "vald";
+const LOCKED = !!res.locked;
 const MULTI = (CFG.key === "multi" || VALD) && !BUSVIEW;
 const LOOK = BUSVIEW ? CONFIGS.buss : CFG;
 const topColor = MULTI ? "#8e8e93" : LOOK.color;
@@ -502,7 +518,7 @@ if (MULTI) {
   bs.backgroundColor = new Color("#3a3a3c");
   bs.centerAlignContent();
   bs.addSpacer();
-  const bi = bs.addImage(SFSymbol.named(VALD ? "pin.fill" : SMALL ? "scope" : "mappin").image);
+  const bi = bs.addImage(SFSymbol.named(LOCKED ? "lock.fill" : "scope").image);
   bi.imageSize = new Size(13, 13);
   bi.tintColor = Color.white();
   bs.addSpacer();
@@ -518,6 +534,12 @@ t1.lineLimit = 1;
 t1.minimumScaleFactor = 0.7;
 const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 top.addSpacer();
+if (!MULTI) {
+  const modeIc = top.addImage(SFSymbol.named(LOCKED ? "lock.fill" : "scope").image);
+  modeIc.imageSize = new Size(11, 11);
+  modeIc.tintColor = HEAD_FG_SOFT;
+  if (!SMALL) top.addSpacer(8);
+}
 if (!SMALL) {
   if (MULTI) {
     const tg = top.addStack();
@@ -525,11 +547,11 @@ if (!SMALL) {
     tg.cornerRadius = 9;
     tg.setPadding(2, 7, 2, 7);
     tg.centerAlignContent();
-    const ti = tg.addImage(SFSymbol.named(VALD ? "pin.fill" : "scope").image);
+    const ti = tg.addImage(SFSymbol.named(LOCKED ? "lock.fill" : "scope").image);
     ti.imageSize = new Size(11, 11);
     ti.tintColor = Color.lightGray();
     tg.addSpacer(3);
-    const tt = tg.addText(VALD ? "Fast" : "Närmast");
+    const tt = tg.addText(LOCKED ? "Fast" : "Närmast");
     tt.font = Font.mediumSystemFont(11);
     tt.textColor = Color.lightGray();
     tt.lineLimit = 1;
