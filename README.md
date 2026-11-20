@@ -20,6 +20,15 @@ Storlekar: liten, mellan och stor.
 ## Hela stationen – du väljer själv
 `Hela-stationen.js` visar alla avgångar från en station du bestämmer, till exempel vid jobbet eller skolan. Lägg ut widgeten, håll in den, välj Redigera widget och skriv stationens namn i fältet Parameter, till exempel Årstaberg. Kör skriptet i Scriptable en gång först.
 
+## Välj station på alla widgets
+Alla widgets tar närmaste station som standard, och då visas en liten måltavla i headern. Vill du låsa en widget till en egen station, till exempel Stockholms östra, gör du på något av tre sätt (första träffen gäller):
+
+1. Skriv stationens namn i widgetens **Parameter** (håll in widgeten, Redigera widget).
+2. Skriv namnet på raden `STATION` överst i skriptet.
+3. Kör skriptet i Scriptable och välj **Välj station** i rutan som kommer upp. Där kan du också gå tillbaka till **Närmaste station**.
+
+En låst widget visar ett lås i headern och bara sitt eget färdsätt. Roslagsbanan på Stockholms östra visar alltså bara Roslagsbanan. **Hela stationen** visar däremot allt på stationen.
+
 ## Egna widgets per linje
 Vill du ha en widget som alltid visar samma färdsätt finns de här:
 
@@ -44,9 +53,12 @@ Vill du ha en widget som alltid visar samma färdsätt finns de här:
 Vill du ha flera linjer gör du ett skript per linje. Lägg widgetarna i en iOS-stack så kan du swipa mellan dem.
 
 ## Så läser du widgeten
-- Pillerna visar minuter kvar. Grön är i tid, gul är försenad och röd är mycket försenad eller inställd.
+- Pillerna visar minuter kvar (eller "Nu"). I linjewidgetarna med två kolumner står linjenumret i en liten bricka före destinationen och spårnumret i en grå ruta efter den, om SL skickar ett spår.
+- Grön är i tid, gul är försenad och röd är mycket försenad eller inställd.
 - Längst ner står trafikläget. Grön text betyder inga störningar, gul är en störning.
-- Stationen väljs automatiskt utifrån din plats.
+- Stationen väljs automatiskt utifrån din plats, om du inte har låst den (se ovan).
+- Rubrikerna är NORR och SÖDER för tunnelbana, pendeltåg och Roslagsbanan. Övriga banor har "Mot ändstation", till exempel MOT NOCKEBY och MOT ALVIK.
+- På en ändstation, där tågen bara går åt ett håll, delas tågen i två kolumner i tidsordning i stället för en tom kolumn.
 - Buss, båt, Närmast station och Hela stationen visar en lista över alla linjer från platsen i tidsordning, med linjenumret bredvid. Blåbussar har blå bricka och övriga bussar röd.
 - Platsen står i en liten ruta: Spår för tåg och tunnelbana, Läge för buss och Brygga för båt.
 - Stor buss-, Närmast station- och Hela stationen-widget visar upp till 10 avgångar. Finns det störningar visas de i sin helhet och tar då plats från de sista avgångarna.
