@@ -343,7 +343,7 @@ const status = error ? null : await loadStatus([...new Set(shown.map(x => String
 // Stor widget: störningar går före avgångar. Varje störning som visas helt tar ca två rader.
 const fullN = LARGE && status && status.kind === "bad" ? Math.min(status.items.length, MAX_FULL) : 0;
 if (fullN && groups) groups = groups.map(g => g.slice(0, Math.max(2, g.length - fullN)));
-else if (fullN) shown = shown.slice(0, Math.max(3, ROWS - 2 * fullN));
+else if (fullN) shown = shown.slice(0, Math.max(3, ROWS - fullN));
 
 const w = new ListWidget();
 w.backgroundColor = Color.black();
