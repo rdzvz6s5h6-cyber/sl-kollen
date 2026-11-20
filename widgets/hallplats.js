@@ -573,12 +573,16 @@ if (error) {
       row.addSpacer(5);
       const MINW = 40;
       const ds = row.addStack();
-      ds.size = new Size(colW - bw - MINW - 16, 0); // 6 pt marginal så att 'min' aldrig klipps
-      const dt = ds.addText(shortName(d.destination));
-      dt.font = Font.mediumSystemFont(13);
+      const dsW = colW - bw - MINW - 13;
+      ds.size = new Size(dsW, 0);
+      const dName = shortName(d.destination);
+      // Storlek efter ordets längd: korta namn stort, långa mindre. iOS krymper annars hårt när något är för brett.
+      const dFs = Math.max(9, Math.min(14, Math.floor(dsW / (dName.length * 0.56))));
+      const dt = ds.addText(dName);
+      dt.font = Font.mediumSystemFont(dFs);
       dt.textColor = Color.white();
       dt.lineLimit = 1;
-      dt.minimumScaleFactor = 0.6; // korta namn behåller stor stil, långa krymper
+      dt.minimumScaleFactor = 0.8;
       dt.leftAlignText();
       ds.addSpacer();
       row.addSpacer(); // flexibel: minuterna hamnar vid kolumnens högerkant
