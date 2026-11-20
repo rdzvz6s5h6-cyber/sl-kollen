@@ -10,6 +10,12 @@ const MYCKET = 6;      // minuter försenad => röd (6 eller mer)
 // names: stationer (gemener) att välja bland först; finns ingen används de 20 närmaste platserna.
 // strict: räkna bara störningar som uttryckligen gäller linjen.
 const CONFIGS = {
+  // Provkörning av namnstorlekar: ritar riktiga rader med många stationsnamn (se kopiera/Namnprov.js)
+  namnprov: {
+    key: "namnprov", label: "namnprov", transport: "METRO", strict: false,
+    group: /./, nums: [], color: "#8E4A9E", letter: "N",
+    titles: ["SIDA A", "SIDA B"], north: /(?!)/, south: /(?!)/, names: [],
+  },
   roda: {
     key: "roda", label: "röda linjen", transport: "METRO", strict: false,
     group: /röda/i, nums: ["13", "14"], color: "#E5322D", letter: "T",
@@ -102,9 +108,10 @@ const CONFIGS = {
   },
 };
 const CFG = CONFIGS[typeof SL_LINJE !== "undefined" ? SL_LINJE : "roda"] || CONFIGS.roda;
-const FAMILY = config.widgetFamily || "medium";
+const NP = CFG.key === "namnprov";
+const FAMILY = NP ? "large" : (config.widgetFamily || "medium");
 const SMALL = FAMILY === "small";
-const ROWS = FAMILY === "large" ? 6 : 3; // stor widget visar fler avgångar per håll
+const ROWS = NP ? 10 : FAMILY === "large" ? 6 : 3; // stor widget visar fler avgångar per håll
 const CANDIDATES = 20;
 const LINE_MAX = 50;   // tecken per rad i trafikläget
 const BASE = "https://transport.integration.sl.se/v1";
@@ -478,7 +485,39 @@ async function resolveFixed() {
   return { st, deps: results[pick], note: "", locked: true };
 }
 
-const res = (await resolveFixed()) || await resolve();
+const NP_NAMES = [
+  "Mörby centrum", "Ropsten", "Norsborg", "Fruängen", "Hässelby strand", "Alvik", "Åkeshov", "Skarpnäck", "Farsta strand", "Hagsätra",
+  "Vällingby", "Hässelby gård", "Akalla", "Hjulsta", "Kungsträdgården", "Odenplan", "Kungsängen", "Bålsta", "Märsta", "Södertälje centrum",
+  "Nynäshamn", "Gnesta", "Västerhaninge", "Uppsala centrum", "Upplands Väsby", "Stockholms södra", "Stockholm City", "Älvsjö", "Flemingsberg", "Jakobsberg",
+  "Tumba", "Södertälje hamn", "Rosersberg", "Arlanda centrum", "Kallhäll", "Kårsta", "Österskär", "Näsbypark", "Stockholms östra", "Lindholmen",
+  "Ormsta", "Vallentuna", "Täby centrum", "Danderyds sjukhus", "Universitetet", "Solna station", "Sickla", "Gullmarsplan", "Lilljansskogen", "Solna centrum",
+  "Waldemarsudde", "T-Centralen", "Gåshaga brygga", "Saltsjöbaden", "Slussen", "Solsidan", "Igelboda", "Henriksdal", "Nockeby", "Hammarbyhöjden",
+];
+async function namnprovData() {
+  let page = parseInt(args.widgetParameter, 10) || 0;
+  if (!page && !config.runsInWidget) {
+    const a = new Alert();
+    a.title = "Namnprov";
+    a.message = "Vilken sida vill du se? Ta en skärmdump av varje sida.";
+    ["Sida 1", "Sida 2", "Sida 3"].forEach(t => a.addAction(t));
+    page = (await a.presentAlert()) + 1;
+  }
+  page = Math.min(3, Math.max(1, page || 1));
+  const names = NP_NAMES.slice((page - 1) * 20, page * 20);
+  const lines = ["13", "14", "17", "18", "19", "10", "11", "27", "28", "28S", "29", "40", "41", "42X", "30", "22"];
+  const t0 = Date.now();
+  const deps = names.map((n, i) => ({
+    destination: n,
+    direction_code: i < 10 ? 2 : 1,
+    scheduled: new Date(t0 + (i % 10 + 1) * 90000 + i * 1000).toISOString(),
+    expected: new Date(t0 + (i % 10 + 1) * 90000 + i * 1000).toISOString(),
+    state: "EXPECTED",
+    line: { designation: lines[(i + page) % lines.length], group_of_lines: "namnprov", transport_mode: "METRO" },
+    stop_point: { designation: String((i % 12) + 1) },
+  }));
+  return { st: { id: 0, name: `Namnprov, sida ${page}` }, deps, note: "" };
+}
+const res = NP ? await namnprovData() : ((await resolveFixed()) || await resolve());
 let deps = res.deps;
 let error = res.error;
 const statusP = loadStatus();
@@ -703,5 +742,5 @@ for (const line of (SMALL ? [] : splitTwo(status.text, LINE_MAX).slice(0, 2))) {
 }
 
 w.refreshAfterDate = new Date(Date.now() + 2 * 60 * 1000);
-if (config.runsInWidget) Script.setWidget(w); else await w.presentMedium();
+if (config.runsInWidget) Script.setWidget(w); else if (NP) await w.presentLarge(); else await w.presentMedium();
 Script.complete();
