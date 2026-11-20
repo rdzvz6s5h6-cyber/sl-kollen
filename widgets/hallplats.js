@@ -573,14 +573,16 @@ if (error) {
       // Storlek efter ordets längd: korta namn stort, långa mindre. iOS krymper annars hårt när något är för brett.
       // Bredd i em ungefär 0,45 per tecken, m och w är bredare (kalibrerat mot riktig rendering). 3 % marginal.
       const dEm = dName.length * 0.45 + 0.2 * (dName.match(/[mMwW]/g) || []).length;
-      const dFs = Math.max(9, Math.min(14, Math.floor(dsW * 0.93 / dEm)));
+      // AUTOFIT: sant = alla namn storlek 15 och iOS krymper de långa själv. Falskt = storleken räknas ut i förväg.
+      const AUTOFIT = true;
+      const dFs = AUTOFIT ? 15 : Math.max(9, Math.min(14, Math.floor(dsW * 0.93 / dEm)));
       const dt = ds.addText(dName);
       dt.font = Font.mediumSystemFont(dFs);
       dt.textColor = Color.white();
       dt.lineLimit = 1;
-      dt.minimumScaleFactor = 0.65; // skyddsnät: krymper hellre än klipper med …
+      dt.minimumScaleFactor = AUTOFIT ? 0.6 : 0.65;
       dt.leftAlignText();
-      ds.addSpacer();
+      if (!AUTOFIT) ds.addSpacer();
       row.addSpacer(); // flexibel: minuterna hamnar vid kolumnens högerkant
       // Minuter som färgad text: grön i tid, gul 3+ min sen, röd 6+ min sen eller inställd
       const ms = row.addStack();
