@@ -187,10 +187,6 @@ function column(parent, title, list, colW) {
   const col = parent.addStack();
   col.layoutVertically();
   col.size = new Size(colW, 0);
-  const h = col.addText(title);
-  h.font = Font.boldSystemFont(10);
-  h.textColor = Color.gray();
-  col.addSpacer(2);
   if (list.length === 0) {
     const t = col.addText("–");
     t.font = Font.systemFont(18);
@@ -264,18 +260,40 @@ const w = new ListWidget();
 w.backgroundColor = Color.black();
 w.setPadding(0, 0, 0, 0);
 
-// Färgad list överst, över hela bredden
-const bar = w.addStack();
-bar.size = new Size(0, 5);
-bar.backgroundColor = new Color(LINE_COLOR);
-bar.addSpacer();
+// Tjock färgad header över hela bredden, med ett grått band under för kolumnrubriker
+const HEAD_FG = Color.white();
+const HEAD_FG_SOFT = new Color(HEAD_FG.hex, 0.8);
+const HEAD_FG_RING = new Color(HEAD_FG.hex, 0.75);
+const head = w.addStack();
+head.backgroundColor = new Color(LINE_COLOR);
+head.setPadding(7, SMALL ? 10 : 12, 7, SMALL ? 10 : 12);
+head.centerAlignContent();
+
+const contentW = Device.screenSize().width - 55 - 24; // uppskattad innehållsbredd
+const colW = Math.floor((contentW - 9) / 2);
+if (!SMALL && !error) {
+  const band = w.addStack();
+  band.backgroundColor = new Color("#1c1c1e");
+  band.setPadding(4, 12, 4, 12);
+  const bt = ["NORR", "SÖDER"];
+  bt.forEach((tt, bi) => {
+    if (bi) band.addSpacer(9);
+    const bc = band.addStack();
+    bc.size = new Size(colW, 0);
+    const h = bc.addText(tt);
+    h.font = Font.mediumSystemFont(10);
+    h.textColor = Color.gray();
+    h.lineLimit = 1;
+  });
+  band.addSpacer();
+}
 
 const content = w.addStack();
 content.layoutVertically();
 content.setPadding(6, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
 
-const top = content.addStack();
-top.centerAlignContent();
+const top = head;
+
 // Märket ritas som en bild så att bokstaven hamnar exakt i mitten
 function lineBadge(letter, color) {
   const N = 96;
@@ -285,6 +303,9 @@ function lineBadge(letter, color) {
   dc.respectScreenScale = false;
   dc.setFillColor(new Color(color));
   dc.fillEllipse(new Rect(0, 0, N, N));
+  dc.setStrokeColor(HEAD_FG_RING);
+  dc.setLineWidth(5);
+  dc.strokeEllipse(new Rect(3, 3, N - 6, N - 6));
   dc.setTextColor(Color.white());
   dc.setFont(Font.boldSystemFont(54));
   dc.setTextAlignedCenter();
@@ -296,12 +317,12 @@ badge.imageSize = new Size(24, 24);
 top.addSpacer(6);
 const t1 = top.addText(stName);
 t1.font = Font.boldSystemFont(SMALL ? 15 : 16);
-t1.textColor = Color.white();
+t1.textColor = HEAD_FG;
 t1.lineLimit = 1;
 t1.minimumScaleFactor = 0.7;
 const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+top.addSpacer();
 if (!SMALL) {
-  top.addSpacer();
   const right = top.addStack();
   right.layoutVertically();
   const ur = right.addStack();
@@ -309,15 +330,15 @@ if (!SMALL) {
   ur.addSpacer();
   const ic = ur.addImage(SFSymbol.named("arrow.clockwise").image);
   ic.imageSize = new Size(10, 10);
-  ic.tintColor = Color.gray();
+  ic.tintColor = HEAD_FG_SOFT;
   ur.addSpacer(3);
   const t2 = ur.addText(stamp);
   t2.font = Font.systemFont(10);
-  t2.textColor = Color.gray();
+  t2.textColor = HEAD_FG_SOFT;
   if (res.note) {
     const n = right.addText(res.note);
     n.font = Font.systemFont(9);
-    n.textColor = Color.gray();
+    n.textColor = HEAD_FG_SOFT;
     n.rightAlignText();
   }
 }
@@ -332,7 +353,6 @@ if (error) {
     .map(d => ({ d, i: info(d, now) }))
     .filter(x => x.i.left >= -1)
     .sort((a, b) => a.i.exp - b.i.exp);
-  const contentW = Device.screenSize().width - 55 - 24; // uppskattad innehållsbredd
   const body = content.addStack();
   if (SMALL) {
     body.layoutVertically();
@@ -342,11 +362,10 @@ if (error) {
     body.addSpacer(5);
     smallRow(body, "SÖDER", sl[0]);
   } else {
-    const colW = Math.floor((contentW - 9) / 2);
     column(body, "NORR", all.filter(x => x.d.direction_code === 2), colW);
     body.addSpacer(4);
     const div = body.addStack();
-    div.size = new Size(1, 20 + ROWS * 23);
+    div.size = new Size(1, 4 + ROWS * 23);
     div.backgroundColor = new Color("#2c2c2e");
     body.addSpacer(4);
     column(body, "SÖDER", all.filter(x => x.d.direction_code === 1), colW);

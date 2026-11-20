@@ -364,23 +364,46 @@ else if (fullN) shown = shown.slice(0, Math.max(3, ROWS - fullN));
 const w = new ListWidget();
 w.backgroundColor = Color.black();
 w.setPadding(0, 0, 0, 0);
-const bar = w.addStack();
-bar.size = new Size(0, 5);
 const first0 = shown[0] && shown[0].d;
 const VALD = CFG.key === "vald";
 const MULTI = (CFG.key === "multi" || VALD) && !BUSVIEW;
 const LOOK = BUSVIEW ? CONFIGS.buss : CFG;
 const topColor = MULTI ? "#8e8e93" : LOOK.color;
 const topLetter = LOOK.letter;
-bar.backgroundColor = new Color(topColor);
-bar.addSpacer();
+
+// Tjock färgad header över hela bredden; i tvåkolumnsläget ett grått band under med lägen
+const HEAD_FG = CFG.letterColor && !MULTI && !BUSVIEW ? new Color(CFG.letterColor) : Color.white();
+const HEAD_FG_SOFT = new Color(HEAD_FG.hex, 0.8);
+const HEAD_FG_RING = new Color(HEAD_FG.hex, 0.75);
+const head = w.addStack();
+head.backgroundColor = new Color(topColor);
+head.setPadding(7, SMALL ? 10 : 12, 7, SMALL ? 10 : 12);
+head.centerAlignContent();
+
+const COLW = Math.floor((Math.min(Device.screenSize().width - 32, 360) - 24 - 13) / 2);
+if (groups && !error) {
+  const band = w.addStack();
+  band.backgroundColor = new Color("#1c1c1e");
+  band.setPadding(4, 12, 4, 12);
+  groups.forEach((g, gi) => {
+    if (gi) band.addSpacer(13);
+    const bc = band.addStack();
+    bc.size = new Size(COLW, 0);
+    const ht = bc.addText(heads[gi]);
+    ht.font = Font.mediumSystemFont(10);
+    ht.textColor = Color.gray();
+    ht.lineLimit = 1;
+    ht.minimumScaleFactor = 0.6;
+  });
+  band.addSpacer();
+}
 
 const content = w.addStack();
 content.layoutVertically();
 content.setPadding(6, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
 
-const top = content.addStack();
-top.centerAlignContent();
+const top = head;
+
 // Märket ritas som en bild så att bokstaven hamnar exakt i mitten
 function modeLogo(parent, d, size) {
   const N = 96;
@@ -408,6 +431,9 @@ function lineBadge(letter, color) {
   dc.respectScreenScale = false;
   dc.setFillColor(new Color(color));
   dc.fillEllipse(new Rect(0, 0, N, N));
+  dc.setStrokeColor(HEAD_FG_RING);
+  dc.setLineWidth(5);
+  dc.strokeEllipse(new Rect(3, 3, N - 6, N - 6));
   dc.setTextColor(CFG.letterColor ? new Color(CFG.letterColor) : Color.white());
   dc.setFont(Font.boldSystemFont(letter.length > 1 ? 40 : 54));
   dc.setTextAlignedCenter();
@@ -433,12 +459,12 @@ if (MULTI) {
 top.addSpacer(6);
 const t1 = top.addText(stName);
 t1.font = Font.boldSystemFont(SMALL ? 15 : 16);
-t1.textColor = Color.white();
+t1.textColor = HEAD_FG;
 t1.lineLimit = 1;
 t1.minimumScaleFactor = 0.7;
 const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+top.addSpacer();
 if (!SMALL) {
-  top.addSpacer();
   if (MULTI) {
     const tg = top.addStack();
     tg.backgroundColor = new Color("#2c2c2e");
@@ -462,15 +488,15 @@ if (!SMALL) {
   ur.addSpacer();
   const ic = ur.addImage(SFSymbol.named("arrow.clockwise").image);
   ic.imageSize = new Size(10, 10);
-  ic.tintColor = Color.gray();
+  ic.tintColor = HEAD_FG_SOFT;
   ur.addSpacer(3);
   const t2 = ur.addText(stamp);
   t2.font = Font.systemFont(10);
-  t2.textColor = Color.gray();
+  t2.textColor = HEAD_FG_SOFT;
   if (res.note) {
     const n = right.addText(res.note);
     n.font = Font.systemFont(9);
-    n.textColor = Color.gray();
+    n.textColor = HEAD_FG_SOFT;
     n.rightAlignText();
   }
 }
@@ -481,7 +507,7 @@ if (error) {
   e.font = Font.systemFont(13);
   e.textColor = Color.orange();
 } else if (groups) {
-  const colW = Math.floor((Math.min(Device.screenSize().width - 32, 360) - 24 - 13) / 2);
+  const colW = COLW;
   const maxN = Math.max(...groups.map(g => g.length));
   const cols = content.addStack();
   cols.topAlignContent();
@@ -490,18 +516,12 @@ if (error) {
       cols.addSpacer(6);
       const dv = cols.addStack();
       dv.backgroundColor = new Color("#3a3a3c");
-      dv.size = new Size(1, maxN * 27 + 16);
+      dv.size = new Size(1, maxN * 27 + 4);
       cols.addSpacer(6);
     }
     const col = cols.addStack();
     col.layoutVertically();
     col.size = new Size(colW, 0);
-    const ht = col.addText(heads[gi]);
-    ht.font = Font.mediumSystemFont(10);
-    ht.textColor = Color.gray();
-    ht.lineLimit = 1;
-    ht.minimumScaleFactor = 0.6;
-    col.addSpacer(4);
     g.forEach(({ d, i }) => {
       const row = col.addStack();
       row.centerAlignContent();
