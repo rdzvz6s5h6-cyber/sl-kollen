@@ -194,7 +194,7 @@ function column(parent, title, list, colW) {
   }
   list.slice(0, ROWS).forEach((item, idx) => {
     const { d, i } = item;
-    const big = idx === 0;
+    const big = false; // alla pillar och rader lika stora, även den översta
     const row = col.addStack();
     row.centerAlignContent();
     pill(row, i, big);

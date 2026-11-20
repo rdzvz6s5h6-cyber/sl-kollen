@@ -673,7 +673,7 @@ if (error) {
       content.addSpacer(4);
       return;
     }
-    const big = idx === 0;
+    const big = false; // alla pillar och rader lika stora, även den översta
     const row = content.addStack();
     row.centerAlignContent();
     pill(row, i, big);
