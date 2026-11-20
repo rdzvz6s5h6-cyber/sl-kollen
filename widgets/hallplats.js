@@ -535,7 +535,7 @@ if (error) {
       const lb0 = top2.addStack();
       lb0.backgroundColor = new Color(badgeColor(d));
       lb0.cornerRadius = 6;
-      lb0.size = new Size(MULTI ? (num0.length > 3 ? 36 : 32) : (num0.length > 3 ? 46 : 38), 20);
+      lb0.size = new Size(num0.length > 3 ? 46 : 38, 20);
       lb0.centerAlignContent();
       lb0.addSpacer();
       const nt0 = lb0.addText(num0);
@@ -544,12 +544,12 @@ if (error) {
       nt0.lineLimit = 1;
       nt0.minimumScaleFactor = 0.7;
       lb0.addSpacer();
-      if (lage0 && platsEtikett(d)) {
-        top2.addSpacer(MULTI ? 3 : 4);
+      if (!MULTI && lage0 && platsEtikett(d)) {
+        top2.addSpacer(4);
         const lg0 = top2.addStack();
         lg0.backgroundColor = new Color("#2c2c2e");
         lg0.cornerRadius = 6;
-        lg0.size = new Size(MULTI ? 18 : 22, 20);
+        lg0.size = new Size(22, 20);
         lg0.centerAlignContent();
         lg0.addSpacer();
         const lt0 = lg0.addText(lage0);
@@ -558,11 +558,25 @@ if (error) {
         lt0.lineLimit = 1;
         lg0.addSpacer();
       }
-      const dest0 = right.addText(shortName(d.destination));
+      // Multi/Närmast/En station: slutstationen och läget i grått delar raden under loggan
+      const dr = MULTI ? right.addStack() : right;
+      if (MULTI) dr.centerAlignContent();
+      const dest0 = dr.addText(shortName(d.destination));
       dest0.font = Font.mediumSystemFont(11);
       dest0.textColor = Color.white();
       dest0.lineLimit = 1;
       dest0.minimumScaleFactor = 0.6;
+      if (MULTI && lage0 && platsEtikett(d)) {
+        dr.addSpacer(4);
+        const lg1 = dr.addStack();
+        lg1.backgroundColor = new Color("#2c2c2e");
+        lg1.cornerRadius = 5;
+        lg1.setPadding(1, 5, 1, 5);
+        const lt1 = lg1.addText(lage0);
+        lt1.font = Font.mediumSystemFont(10);
+        lt1.textColor = Color.lightGray();
+        lt1.lineLimit = 1;
+      }
       content.addSpacer(4);
       return;
     }
