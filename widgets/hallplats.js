@@ -181,10 +181,10 @@ function info(d, now) {
 }
 
 // Översta pillen (big): innehållet centrerat. Övriga: innehållet högerjusterat.
-function pill(parent, i, big) {
-  const W = big ? 56 : 50;
-  const numSize = big ? 23 : 17;
-  const unitSize = big ? 10 : 9;
+function pill(parent, i, big, compact) {
+  const W = compact ? 44 : big ? 56 : 50;
+  const numSize = compact ? 15 : big ? 23 : 17;
+  const unitSize = compact ? 8 : big ? 10 : 9;
   const RIGHT_INSET = 6;
   let label, unit = null;
   if (i.cancelled) label = "Inst.";
@@ -448,13 +448,13 @@ if (error) {
     g.forEach(({ d, i }) => {
       const row = col.addStack();
       row.centerAlignContent();
-      pill(row, i, false);
+      pill(row, i, false, true);
       row.addSpacer(4);
       const num = String((d.line && d.line.designation) || "");
       const lb = row.addStack();
       lb.backgroundColor = new Color(badgeColor(d));
       lb.cornerRadius = 5;
-      lb.size = new Size(num.length > 3 ? 36 : 30, 20);
+      lb.size = new Size(num.length > 3 ? 44 : 36, 20);
       lb.centerAlignContent();
       lb.addSpacer();
       const nt = lb.addText(num);
