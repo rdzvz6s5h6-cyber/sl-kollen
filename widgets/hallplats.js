@@ -404,8 +404,8 @@ if (fullN && groups) groups = groups.map(g => g.slice(0, Math.max(3, g.length - 
 else if (fullN) shown = shown.slice(0, Math.max(3, ROWS - fullN));
 
 // Teckenbredd (i em, SF Medium) per bokstav, så att textstorleken kan räknas ut för varje namn
-const EMW = { a:.55,b:.58,c:.53,d:.58,e:.55,f:.31,g:.58,h:.56,i:.25,j:.25,k:.52,l:.25,m:.87,n:.56,o:.58,p:.58,q:.58,r:.35,s:.5,t:.33,u:.56,v:.5,w:.78,x:.5,y:.5,z:.48,"å":.55,"ä":.55,"ö":.58,"é":.55," ":.26,"-":.35,".":.27,"/":.3,
-  A:.67,B:.63,C:.7,D:.7,E:.57,F:.55,G:.72,H:.72,I:.28,J:.5,K:.64,L:.53,M:.87,N:.73,O:.76,P:.6,Q:.76,R:.63,S:.6,T:.58,U:.7,V:.64,W:.95,X:.63,Y:.6,Z:.6,"Å":.67,"Ä":.67,"Ö":.76 };
+const EMW = { a:.543,b:.593,c:.547,d:.593,e:.57,f:.318,g:.593,h:.585,i:.243,j:.243,k:.523,l:.243,m:.873,n:.585,o:.595,p:.593,q:.593,r:.364,s:.506,t:.355,u:.585,v:.52,w:.77,x:.507,y:.52,z:.48,"å":.543,"ä":.543,"ö":.595,"é":.57," ":.28,"-":.35,".":.28,"/":.3,
+  A:.69,B:.64,C:.73,D:.76,E:.58,F:.56,G:.77,H:.75,I:.29,J:.5,K:.65,L:.54,M:.88,N:.76,O:.79,P:.62,Q:.79,R:.65,S:.63,T:.61,U:.75,V:.67,W:.98,X:.65,Y:.63,Z:.62,"Å":.69,"Ä":.69,"Ö":.79 };
 function emWidth(s) {
   let t = 0;
   for (const ch of String(s)) t += EMW[ch] !== undefined ? EMW[ch] : 0.6;
@@ -615,17 +615,18 @@ if (error) {
       const dsW = colW - bw - MINW - 13;
       ds.size = new Size(dsW, 0);
       const dName = shortName(d.destination);
-      // Storlek efter ordets verkliga bredd (tabell per bokstav), 2 % marginal. Korta namn stort, långa mindre.
+      // Storlek efter ordets verkliga bredd (tabell per bokstav), verklig bredd ≈ 1,05 × tabellen, därför 0,9. Korta namn stort, långa mindre.
       // AUTOFIT: sant = alla namn storlek 15 och iOS krymper de långa själv. Falskt = storleken räknas ut i förväg.
       const AUTOFIT = false;
-      const dFs = AUTOFIT ? 15 : fitSize(dName, dsW * 0.98, 9, 14);
+      const dFs = AUTOFIT ? 15 : fitSize(dName, dsW * 0.9, 9, 14);
       const dt = ds.addText(dName);
       dt.font = Font.mediumSystemFont(dFs);
       dt.textColor = Color.white();
       dt.lineLimit = 1;
       dt.minimumScaleFactor = AUTOFIT ? 0.6 : 0.65;
       dt.leftAlignText();
-      if (!AUTOFIT) ds.addSpacer();
+      // Ingen spacer: den åt upp ca 9 pt av bredden (uppmätt). Vänsterställ med högerpadding.
+      if (!AUTOFIT) ds.setPadding(0, 0, 0, Math.max(0, Math.round(dsW - emWidth(dName) * dFs * 1.06)));
       row.addSpacer(); // flexibel: minuterna hamnar vid kolumnens högerkant
       // Minuter som färgad text: grön i tid, gul 3+ min sen, röd 6+ min sen eller inställd
       const ms = row.addStack();
