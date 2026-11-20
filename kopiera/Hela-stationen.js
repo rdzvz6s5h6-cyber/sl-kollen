@@ -1,4 +1,4 @@
-// SL-kollen – En station: avgångar från en station du själv väljer (alla trafikslag)
+// SL-kollen – Hela stationen: avgångar från en station du själv väljer (alla trafikslag)
 // Kopiera hela filen till ett nytt skript i Scriptable.
 //
 // SÅ VÄLJER DU STATION (tre sätt, i den här ordningen):

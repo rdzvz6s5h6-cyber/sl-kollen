@@ -1,4 +1,4 @@
-// SL-kollen – bussar, båtar, Närmast (multi) och Vald station (vald). Läget styrs av laddaren (SL_LINJE): buss, bat, multi eller vald.
+// SL-kollen – bussar, båtar, Närmast (multi) och Hela stationen (vald). Läget styrs av laddaren (SL_LINJE): buss, bat, multi eller vald.
 // Visar de närmaste avgångarna från närmaste hållplats/brygga, alla linjer och håll blandade i tidsordning.
 const CONFIGS = {
   buss: {
@@ -174,7 +174,7 @@ async function resolve() {
   return { error: CFG.empty };
 }
 
-// Låst station. Vald station kräver ett namn. Buss, Båt och Närmast station har det som tillval:
+// Låst station. Hela stationen kräver ett namn. Buss, Båt och Närmast station har det som tillval:
 // inget namn = närmaste station (resolve), namn = låst till den stationen.
 // Ordning: Parameter på widgeten, STATION överst i skriptet, sparat val i appen.
 async function resolveVald() {
@@ -362,7 +362,7 @@ const all = error ? [] : deps
   .filter(x => x.i.left >= -1)
   .sort((a, b) => a.i.exp - b.i.exp);
 let shown = all.slice(0, ROWS);
-// Närmast station / En station: finns bara bussar på stationen visas bussvyn (blått B, två kolumner per läge).
+// Närmast station / Hela stationen: finns bara bussar på stationen visas bussvyn (blått B, två kolumner per läge).
 const BUSVIEW = CFG.key === "buss" || ((CFG.key === "multi" || CFG.key === "vald") && all.length > 0 &&
   all.every(x => String((x.d.line || {}).transport_mode || "").toUpperCase() === "BUS"));
 // Buss, medium/stor: dela upp per fysiskt stopp (läge). Varje stopp ligger på en sida av vägen, alltså en riktning.
@@ -692,7 +692,7 @@ if (error) {
         lt0.lineLimit = 1;
         lg0.addSpacer();
       }
-      // Multi/Närmast/En station: slutstationen och läget i grått delar raden under loggan
+      // Multi/Närmast/Hela stationen: slutstationen och läget i grått delar raden under loggan
       const dr = MULTI ? right.addStack() : right;
       if (MULTI) dr.centerAlignContent();
       const dest0 = dr.addText(shortName(d.destination));
