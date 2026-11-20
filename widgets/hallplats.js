@@ -747,15 +747,20 @@ if (status) {
   if (SMALL) {
     const srow = content.addStack();
     srow.addSpacer();
-    if (status.kind !== "bad") {
-      const sic = srow.addImage(SFSymbol.named("arrow.clockwise").image);
-      sic.imageSize = new Size(10, 10);
-      sic.tintColor = Color.gray();
-      srow.addSpacer(3);
+    if (status.kind === "bad") {
+      const sb = srow.addText("Störning");
+      sb.font = Font.systemFont(10);
+      sb.textColor = new Color(PAL.y.bg);
+      sb.lineLimit = 1;
+      srow.addSpacer(6);
     }
-    const st = srow.addText(status.kind === "bad" ? "Störning" : stamp);
+    const sic = srow.addImage(SFSymbol.named("arrow.clockwise").image);
+    sic.imageSize = new Size(10, 10);
+    sic.tintColor = Color.gray();
+    srow.addSpacer(3);
+    const st = srow.addText(stamp);
     st.font = Font.systemFont(10);
-    st.textColor = status.kind === "bad" ? new Color(PAL.y.bg) : Color.gray();
+    st.textColor = Color.gray();
     st.lineLimit = 1;
     srow.addSpacer();
   } else if (fullN) {
