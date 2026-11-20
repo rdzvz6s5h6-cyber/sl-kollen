@@ -279,15 +279,15 @@ function info(d, now) {
 }
 
 // Översta pillen (big): innehållet centrerat. Övriga: innehållet högerjusterat.
-function pill(parent, i, big) {
-  const W = big ? 56 : 50;
+function pill(parent, i, big, narrow) {
+  const W = narrow ? 38 : big ? 56 : 50;
   const numSize = big ? 23 : 17;
   const unitSize = big ? 10 : 9;
   const RIGHT_INSET = 6;
   let label, unit = null;
   if (i.cancelled) label = "Inst.";
   else if (i.left <= 0) label = "Nu";
-  else { label = String(i.left); unit = "min"; }
+  else { label = String(i.left); unit = narrow ? null : "min"; } // smal pill (kolumner): bara siffran
   const labSize = i.cancelled ? Math.round(numSize * 0.6) : numSize;
   let cw = label.length * labSize * 0.62;
   if (unit) cw += 1 + unit.length * unitSize * 0.6;
@@ -327,16 +327,52 @@ function column(parent, title, list, colW) {
     const big = false; // alla pillar och rader lika stora, även den översta
     const row = col.addStack();
     row.centerAlignContent();
-    pill(row, i, big);
-    row.addSpacer(5);
+    pill(row, i, big, true);
+    row.addSpacer(4);
     const dName = shortName(d.destination);
-    // Storlek räknas ut efter ordets längd (max 15). iOS autokrympning gav för liten text i medium.
-    const dFs = fitSize(dName, (colW - 55) * 0.97, 10, 15);
-    const dest = row.addText(dName);
+    const lineNo = String((d.line && d.line.designation) || "");
+    const spar = String((d.stop_point && d.stop_point.designation) || "").trim();
+    // Linjenummer-bricka (24) före destinationen och spår-ruta (16) efter. Destinationen får resten, storlek räknas ut efter bredd.
+    if (lineNo) {
+      const lb = row.addStack();
+      lb.size = new Size(24, 16);
+      lb.cornerRadius = 4;
+      lb.backgroundColor = new Color(CFG.color);
+      lb.centerAlignContent();
+      lb.addSpacer();
+      const lt = lb.addText(lineNo);
+      lt.font = Font.boldSystemFont(lineNo.length > 2 ? 9 : 10);
+      lt.textColor = CFG.letterColor ? new Color(CFG.letterColor) : Color.white();
+      lt.lineLimit = 1;
+      lt.minimumScaleFactor = 0.7;
+      lb.addSpacer();
+      row.addSpacer(3);
+    }
+    const destW = colW - 38 - 4 - (lineNo ? 27 : 0) - (spar ? 19 : 0);
+    const dFs = fitSize(dName, destW * 0.97, 8.5, 15);
+    const ds = row.addStack();
+    ds.size = new Size(destW, 0);
+    const dest = ds.addText(dName);
     dest.font = Font.mediumSystemFont(dFs);
     dest.textColor = Color.white();
     dest.lineLimit = 1;
     dest.minimumScaleFactor = 0.8; // bara säkerhetsnät om namnet ändå är för brett
+    dest.leftAlignText();
+    if (spar) {
+      row.addSpacer(3);
+      const sb = row.addStack();
+      sb.size = new Size(16, 15);
+      sb.cornerRadius = 4;
+      sb.backgroundColor = new Color("#2c2c2e");
+      sb.centerAlignContent();
+      sb.addSpacer();
+      const st = sb.addText(spar);
+      st.font = Font.boldSystemFont(spar.length > 1 ? 9 : 10);
+      st.textColor = new Color("#aeaeb2");
+      st.lineLimit = 1;
+      st.minimumScaleFactor = 0.7;
+      sb.addSpacer();
+    }
     col.addSpacer(3);
   });
 }
