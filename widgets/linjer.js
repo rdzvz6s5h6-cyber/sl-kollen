@@ -364,7 +364,8 @@ function column(parent, title, list, colW) {
     dest.font = Font.mediumSystemFont(dFs);
     dest.textColor = Color.white();
     dest.lineLimit = 1;
-    dest.minimumScaleFactor = 0.8; // bara säkerhetsnät om namnet ändå är för brett
+    // Ingen autokrympning när namnet ryms (annars krymper iOS texten i mellan men inte i stor). Bara om det inte ryms ens på minsta storlek.
+    dest.minimumScaleFactor = emWidth(dName) * dFs > destW * 0.97 ? 0.75 : 1;
     dest.leftAlignText();
     ds.addSpacer();
     if (spar) {
