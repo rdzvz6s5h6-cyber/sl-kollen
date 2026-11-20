@@ -574,7 +574,7 @@ if (error) {
       // Bredd i em ungefär 0,45 per tecken, m och w är bredare (kalibrerat mot riktig rendering). 3 % marginal.
       const dEm = dName.length * 0.45 + 0.2 * (dName.match(/[mMwW]/g) || []).length;
       // AUTOFIT: sant = alla namn storlek 15 och iOS krymper de långa själv. Falskt = storleken räknas ut i förväg.
-      const AUTOFIT = true;
+      const AUTOFIT = false;
       const dFs = AUTOFIT ? 15 : Math.max(9, Math.min(14, Math.floor(dsW * 0.93 / dEm)));
       const dt = ds.addText(dName);
       dt.font = Font.mediumSystemFont(dFs);
