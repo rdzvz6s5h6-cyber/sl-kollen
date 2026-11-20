@@ -287,7 +287,7 @@ function splitTwo(text, max) {
 // så blåbussarna listas här efter linjenummer (kontrollera listan om SL ändrar stomnätet).
 const BLUE_BUSES = ["1", "2", "3", "4", "5", "6", "172", "173", "175", "176", "177", "178", "179",
   "471", "474", "670", "676", "677"];
-const TRAM_COLORS = { "22": "#E8822B", "21": "#A5682A", "12": "#7A5C3E", "25": "#1FA3A3", "26": "#1FA3A3", "7": "#6FA33A", "7N": "#6FA33A" };
+const TRAM_COLORS = { "22": "#C9651A", "21": "#A5682A", "12": "#7A5C3E", "25": "#1FA3A3", "26": "#1FA3A3", "7": "#6FA33A", "7N": "#6FA33A" };
 function busColor(l) {
   const blue = /blå/i.test(String(l.group_of_lines || "")) || BLUE_BUSES.includes(String(l.designation));
   return blue ? "#1E5AA8" : "#D32F2F";
@@ -312,7 +312,7 @@ function badgeColor(d) {
     return "#0089CA";
   }
   if (m === "TRAIN") return (/roslags/i.test(g) || ["27", "28", "29"].includes(n)) ? "#8E4A9E" : "#EC619F";
-  if (m === "TRAM") return TRAM_COLORS[n] || "#E8822B";
+  if (m === "TRAM") return TRAM_COLORS[n] || "#C9651A";
   if (m === "SHIP" || m === "FERRY") return "#0E8A9B";
   return busColor(l);
 }

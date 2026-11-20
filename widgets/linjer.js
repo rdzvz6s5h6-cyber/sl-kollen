@@ -55,7 +55,7 @@ const CONFIGS = {
   },
   tvarbanan: {
     key: "tvarbanan", label: "Tvärbanan", transport: "TRAM", strict: true,
-    group: /tvär/i, nums: ["22"], color: "#E8822B", letter: "Tv",
+    group: /tvär/i, nums: ["22"], color: "#C9651A", letter: "Tv",
     titles: ["MOT SOLNA / ALVIK", "MOT SICKLA"], north: /alvik|solna/i, south: /sickla|gullmarsplan|liljeholmen/i,
     names: ["alvik", "stora essingen", "gröndal", "årsta", "lindhagensplan", "liljeholmen",
       "årstadal", "årstaberg", "årstaberg", "johannesfred", "sofia", "hammarby", "sickla",
