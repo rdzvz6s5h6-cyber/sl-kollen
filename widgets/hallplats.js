@@ -310,7 +310,8 @@ w.setPadding(0, 0, 0, 0);
 const bar = w.addStack();
 bar.size = new Size(0, 5);
 const first0 = shown[0] && shown[0].d;
-const topColor = CFG.key === "multi" && first0 ? badgeColor(first0) : CFG.color;
+const MULTI = CFG.key === "multi";
+const topColor = MULTI ? "#8e8e93" : CFG.color;
 const topLetter = CFG.key === "multi" && first0 ? modeLetter(first0) : CFG.letter;
 bar.backgroundColor = new Color(topColor);
 bar.addSpacer();
@@ -322,6 +323,20 @@ content.setPadding(6, SMALL ? 10 : 12, 4, SMALL ? 10 : 12);
 const top = content.addStack();
 top.centerAlignContent();
 // Märket ritas som en bild så att bokstaven hamnar exakt i mitten
+function modeBox(parent, d, w, h, fs) {
+  const mb = parent.addStack();
+  mb.backgroundColor = new Color("#2c2c2e");
+  mb.cornerRadius = 5;
+  mb.size = new Size(w, h);
+  mb.centerAlignContent();
+  mb.addSpacer();
+  const mt = mb.addText(modeLetter(d));
+  mt.font = Font.mediumSystemFont(fs);
+  mt.textColor = Color.lightGray();
+  mt.lineLimit = 1;
+  mt.minimumScaleFactor = 0.7;
+  mb.addSpacer();
+}
 function lineBadge(letter, color) {
   const N = 96;
   const dc = new DrawContext();
@@ -336,8 +351,22 @@ function lineBadge(letter, color) {
   dc.drawTextInRect(letter, new Rect(0, letter.length > 1 ? 24 : 15, N, N - 15));
   return dc.getImage();
 }
-const badge = top.addImage(lineBadge(topLetter, topColor));
-badge.imageSize = new Size(24, 24);
+if (MULTI) {
+  // Multi: neutral cirkel med symbol, så den skiljer sig från widgetarna per linje
+  const bs = top.addStack();
+  bs.size = new Size(24, 24);
+  bs.cornerRadius = 12;
+  bs.backgroundColor = new Color("#3a3a3c");
+  bs.centerAlignContent();
+  bs.addSpacer();
+  const bi = bs.addImage(SFSymbol.named(SMALL ? "scope" : "mappin").image);
+  bi.imageSize = new Size(13, 13);
+  bi.tintColor = Color.white();
+  bs.addSpacer();
+} else {
+  const badge = top.addImage(lineBadge(topLetter, topColor));
+  badge.imageSize = new Size(24, 24);
+}
 top.addSpacer(6);
 const t1 = top.addText(stName);
 t1.font = Font.boldSystemFont(SMALL ? 15 : 16);
@@ -347,6 +376,22 @@ t1.minimumScaleFactor = 0.7;
 const stamp = now.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 if (!SMALL) {
   top.addSpacer();
+  if (MULTI) {
+    const tg = top.addStack();
+    tg.backgroundColor = new Color("#2c2c2e");
+    tg.cornerRadius = 9;
+    tg.setPadding(2, 7, 2, 7);
+    tg.centerAlignContent();
+    const ti = tg.addImage(SFSymbol.named("scope").image);
+    ti.imageSize = new Size(11, 11);
+    ti.tintColor = Color.lightGray();
+    tg.addSpacer(3);
+    const tt = tg.addText("Närmast");
+    tt.font = Font.mediumSystemFont(11);
+    tt.textColor = Color.lightGray();
+    tt.lineLimit = 1;
+    top.addSpacer(6);
+  }
   const right = top.addStack();
   right.layoutVertically();
   const ur = right.addStack();
@@ -440,6 +485,7 @@ if (error) {
       const top2 = right.addStack();
       top2.centerAlignContent();
       const num0 = String((d.line && d.line.designation) || "");
+      if (MULTI) { modeBox(top2, d, 22, 20, 11); top2.addSpacer(4); }
       const lb0 = top2.addStack();
       lb0.backgroundColor = new Color(badgeColor(d));
       lb0.cornerRadius = 6;
@@ -452,7 +498,7 @@ if (error) {
       nt0.lineLimit = 1;
       nt0.minimumScaleFactor = 0.7;
       lb0.addSpacer();
-      if (lage0 && platsEtikett(d)) {
+      if (!MULTI && lage0 && platsEtikett(d)) {
         top2.addSpacer(4);
         const lg0 = top2.addStack();
         lg0.backgroundColor = new Color("#2c2c2e");
@@ -481,6 +527,7 @@ if (error) {
     row.addSpacer(big ? 5 : 11); // översta pillen är bredare; lika startpunkt för linjenumren
     // linjenummer i en liten färgad ruta (fast bredd, siffrorna centrerade)
     const num = String((d.line && d.line.designation) || "");
+    if (MULTI && !SMALL) { modeBox(row, d, 24, 24, 12); row.addSpacer(4); }
     const NW = SMALL ? 38 : (num.length > 3 ? 52 : 44);
     const lb = row.addStack();
     lb.backgroundColor = new Color(badgeColor(d));
