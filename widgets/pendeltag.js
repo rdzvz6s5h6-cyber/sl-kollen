@@ -240,9 +240,13 @@ const LINE_LETTER = "P";
 
 // Liten widget: bara nästa avgång per håll
 function smallRow(parent, title, item) {
-  const h = parent.addText(title);
+  const hs = parent.addStack();
+  hs.size = new Size(56, 0); // samma bredd som pillret så att rubriken centreras över det
+  hs.addSpacer();
+  const h = hs.addText(title);
   h.font = Font.boldSystemFont(9);
   h.textColor = Color.gray();
+  hs.addSpacer();
   if (!item) {
     const t = parent.addText("–");
     t.font = Font.systemFont(18);
@@ -254,7 +258,7 @@ function smallRow(parent, title, item) {
   pill(row, item.i, true);
   row.addSpacer(5);
   const dest = row.addText(shortName(item.d.destination));
-  dest.font = Font.boldSystemFont(13);
+  dest.font = Font.boldSystemFont(15);
   dest.textColor = Color.white();
   dest.lineLimit = 1;
   dest.minimumScaleFactor = 0.6;
