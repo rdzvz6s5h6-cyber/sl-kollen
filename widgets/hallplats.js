@@ -524,12 +524,6 @@ if (!SMALL) {
   const t2 = ur.addText(stamp);
   t2.font = Font.systemFont(10);
   t2.textColor = HEAD_FG_SOFT;
-  if (res.note) {
-    const n = right.addText(res.note);
-    n.font = Font.systemFont(9);
-    n.textColor = HEAD_FG_SOFT;
-    n.rightAlignText();
-  }
 }
 content.addSpacer(3);
 
