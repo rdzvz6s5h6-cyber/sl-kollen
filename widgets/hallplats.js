@@ -279,7 +279,7 @@ function busColor(l) {
 function badgeColor(d) {
   const l = d.line || {};
   if (CFG.key === "buss") return busColor(l);
-  if (CFG.key !== "multi") return CFG.color;
+  if (CFG.key !== "multi" && CFG.key !== "vald") return CFG.color;
   const n = String(l.designation), g = String(l.group_of_lines || "");
   const m = String(l.transport_mode || "").toUpperCase();
   if (m === "METRO") {
@@ -322,17 +322,33 @@ const all = error ? [] : deps
   .filter(x => x.i.left >= -1)
   .sort((a, b) => a.i.exp - b.i.exp);
 let shown = all.slice(0, ROWS);
+// Närmast station / En station: finns bara bussar på stationen visas bussvyn (blått B, två kolumner per läge).
+const BUSVIEW = CFG.key === "buss" || ((CFG.key === "multi" || CFG.key === "vald") && all.length > 0 &&
+  all.every(x => String((x.d.line || {}).transport_mode || "").toUpperCase() === "BUS"));
 // Buss, medium/stor: dela upp per fysiskt stopp (läge). Varje stopp ligger på en sida av vägen, alltså en riktning.
 const spKey = d => { const sp = d.stop_point || {}; return String(sp.id || sp.designation || ""); };
 let groups = null;
-if (CFG.key === "buss" && !SMALL) {
+let heads = [];
+if (BUSVIEW && !SMALL) {
   const gm = new Map();
   for (const x of all) { const k = spKey(x.d); if (!gm.has(k)) gm.set(k, []); gm.get(k).push(x); }
   if (!gm.has("") && gm.size >= 2) {
     const COLROWS = LARGE ? 5 : 3;
-    groups = [...gm.values()].slice(0, 2).map(g => g.slice(0, COLROWS));
-    const lg = g => String(((g[0].d.stop_point || {}).designation) || "");
-    groups.sort((a, b) => lg(a).localeCompare(lg(b)));
+    const gl = [...gm.values()].slice(0, 2);
+    const lg = g => String(((g[0].d.stop_point || {}).designation) || "").trim();
+    gl.sort((a, b) => lg(a).localeCompare(lg(b)));
+    // Rubrik: läge (om SL anger det) och linjerna som stannar vid stoppet. Lika rubriker får slutstation.
+    const linesOf = g => [...new Set(g.map(x => String((x.d.line && x.d.line.designation) || "")))].sort((a, b) => a.localeCompare(b, "sv", { numeric: true }));
+    const mkHead = g => {
+      const ln = linesOf(g);
+      const lt = ln.length > 1 ? ln.join(", ") : `Linje ${ln[0]}`;
+      return lg(g) ? `Läge ${lg(g)} · ${lt}` : lt;
+    };
+    heads = gl.map(mkHead);
+    if (heads[0] === heads[1]) {
+      heads = gl.map((g, i) => `${heads[i]} · mot ${[...new Set(g.slice(0, 2).map(x => shortName(x.d.destination)))].join("/")}`);
+    }
+    groups = gl.map(g => g.slice(0, COLROWS));
     shown = groups.flat();
   }
 }
@@ -352,9 +368,10 @@ const bar = w.addStack();
 bar.size = new Size(0, 5);
 const first0 = shown[0] && shown[0].d;
 const VALD = CFG.key === "vald";
-const MULTI = CFG.key === "multi" || VALD;
-const topColor = MULTI ? "#8e8e93" : CFG.color;
-const topLetter = CFG.key === "multi" && first0 ? modeLetter(first0) : CFG.letter;
+const MULTI = (CFG.key === "multi" || VALD) && !BUSVIEW;
+const LOOK = BUSVIEW ? CONFIGS.buss : CFG;
+const topColor = MULTI ? "#8e8e93" : LOOK.color;
+const topLetter = LOOK.letter;
 bar.backgroundColor = new Color(topColor);
 bar.addSpacer();
 
@@ -479,9 +496,7 @@ if (error) {
     const col = cols.addStack();
     col.layoutVertically();
     col.size = new Size(colW, 0);
-    const lage = String(((g[0].d.stop_point || {}).designation) || "").trim();
-    const dests = [...new Set(g.slice(0, 2).map(x => shortName(x.d.destination)))].join("/");
-    const ht = col.addText(lage ? `Läge ${lage} · mot ${dests}` : `Mot ${dests}`);
+    const ht = col.addText(heads[gi]);
     ht.font = Font.mediumSystemFont(10);
     ht.textColor = Color.gray();
     ht.lineLimit = 1;
