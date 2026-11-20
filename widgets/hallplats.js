@@ -505,13 +505,12 @@ if (error) {
     g.forEach(({ d, i }) => {
       const row = col.addStack();
       row.centerAlignContent();
-      pill(row, i, false, true);
-      row.addSpacer(4);
       const num = String((d.line && d.line.designation) || "");
+      const bw = num.length > 3 ? 44 : 36;
       const lb = row.addStack();
       lb.backgroundColor = new Color(badgeColor(d));
       lb.cornerRadius = 5;
-      lb.size = new Size(num.length > 3 ? 44 : 36, 20);
+      lb.size = new Size(bw, 20);
       lb.centerAlignContent();
       lb.addSpacer();
       const nt = lb.addText(num);
@@ -520,12 +519,33 @@ if (error) {
       nt.lineLimit = 1;
       nt.minimumScaleFactor = 0.7;
       lb.addSpacer();
-      row.addSpacer(4);
-      const dt = row.addText(shortName(d.destination));
+      row.addSpacer(5);
+      const MINW = 40;
+      const ds = row.addStack();
+      ds.size = new Size(colW - bw - MINW - 10, 0);
+      const dt = ds.addText(shortName(d.destination));
       dt.font = Font.mediumSystemFont(10);
       dt.textColor = Color.white();
       dt.lineLimit = 1;
       dt.minimumScaleFactor = 0.75;
+      row.addSpacer(5);
+      // Minuter som färgad text: grön i tid, gul 3+ min sen, röd 6+ min sen eller inställd
+      const ms = row.addStack();
+      ms.size = new Size(MINW, 0);
+      ms.centerAlignContent();
+      ms.addSpacer();
+      const mc = new Color(PAL[i.level].bg);
+      const lab = i.cancelled ? "Inst." : i.left <= 0 ? "Nu" : String(i.left);
+      const mt = ms.addText(lab);
+      mt.font = Font.boldSystemFont(i.cancelled ? 10 : 14);
+      mt.textColor = mc;
+      mt.lineLimit = 1;
+      if (!i.cancelled && i.left > 0) {
+        ms.addSpacer(1);
+        const mu = ms.addText("min");
+        mu.font = Font.boldSystemFont(8);
+        mu.textColor = mc;
+      }
       col.addSpacer(5);
     });
   });
