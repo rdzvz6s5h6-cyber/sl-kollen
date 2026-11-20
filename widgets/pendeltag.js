@@ -234,7 +234,7 @@ function column(parent, title, list, colW) {
       row.addSpacer(3);
     }
     const destW = colW - 38 - 4 - (lineNo ? 27 : 0) - (spar ? 19 : 0);
-    const dFs = fitSize(dName, destW * 0.8, 8.5, 15); // Texten klipps redan vid ca 55 av 64 pt (uppmätt via Namnprov), därför 0,8
+    const dFs = fitSize(dName, destW * 0.9, 8.5, 15); // Verklig bredd ≈ 1,05 × tabellen (uppmätt via Namnprov), därför 0,9
     const ds = row.addStack();
     ds.size = new Size(destW, 0);
     const dest = ds.addText(dName);
@@ -242,9 +242,10 @@ function column(parent, title, list, colW) {
     dest.textColor = Color.white();
     dest.lineLimit = 1;
     // Ingen autokrympning när namnet ryms (annars krymper iOS texten i mellan men inte i stor). Bara om det inte ryms ens på minsta storlek.
-    dest.minimumScaleFactor = emWidth(dName) * dFs > destW * 0.8 ? 0.75 : 1;
+    dest.minimumScaleFactor = emWidth(dName) * dFs > destW * 0.9 ? 0.75 : 1;
     dest.leftAlignText();
-    ds.addSpacer();
+    // Ingen spacer: den åt upp ca 9 av 64 pt. Vänsterställ med högerpadding i stället (uppmätt via Namnprov).
+    ds.setPadding(0, 0, 0, Math.max(0, Math.round(destW - emWidth(dName) * dFs * 1.06)));
     if (spar) {
       row.addSpacer(3);
       const sb = row.addStack();

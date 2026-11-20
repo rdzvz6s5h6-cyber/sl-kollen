@@ -378,8 +378,7 @@ function column(parent, title, list, colW) {
       row.addSpacer(3);
     }
     const destW = colW - 38 - 4 - (lineNo ? 27 : 0) - (spar ? 19 : 0);
-    const dFull = NP_VAR ? 0.95 : 0.8;
-    const dFs = fitSize(dName, destW * dFull, 8.5, 15); // Texten klipps redan vid ca 55 av 64 pt (uppmätt via Namnprov), därför 0,8
+    const dFs = fitSize(dName, destW * 0.9, 8.5, 15); // Verklig bredd ≈ 1,05 × tabellen (uppmätt via Namnprov), därför 0,9
     const ds = row.addStack();
     ds.size = new Size(destW, 0);
     const dest = ds.addText(dName);
@@ -387,10 +386,10 @@ function column(parent, title, list, colW) {
     dest.textColor = Color.white();
     dest.lineLimit = 1;
     // Ingen autokrympning när namnet ryms (annars krymper iOS texten i mellan men inte i stor). Bara om det inte ryms ens på minsta storlek.
-    dest.minimumScaleFactor = emWidth(dName) * dFs > destW * dFull ? 0.75 : 1;
+    dest.minimumScaleFactor = emWidth(dName) * dFs > destW * 0.9 ? 0.75 : 1;
     dest.leftAlignText();
-    if (NP_VAR) ds.setPadding(0, 0, 0, Math.max(0, Math.round(destW - emWidth(dName) * dFs * 1.06)));
-    else ds.addSpacer();
+    // Ingen spacer: den åt upp ca 9 av 64 pt. Vänsterställ med högerpadding i stället (uppmätt via Namnprov).
+    ds.setPadding(0, 0, 0, Math.max(0, Math.round(destW - emWidth(dName) * dFs * 1.06)));
     if (spar) {
       row.addSpacer(3);
       const sb = row.addStack();
@@ -489,7 +488,6 @@ async function resolveFixed() {
   return { st, deps: results[pick], note: "", locked: true };
 }
 
-let NP_VAR = false; // Namnprov: variant utan spacer (testar om spacern äter 9 pt)
 const NP_NAMES = [
   "Mörby centrum", "Ropsten", "Norsborg", "Fruängen", "Hässelby strand", "Alvik", "Åkeshov", "Skarpnäck", "Farsta strand", "Hagsätra",
   "Vällingby", "Hässelby gård", "Akalla", "Hjulsta", "Kungsträdgården", "Odenplan", "Kungsängen", "Bålsta", "Märsta", "Södertälje centrum",
@@ -504,12 +502,10 @@ async function namnprovData() {
     const a = new Alert();
     a.title = "Namnprov";
     a.message = "Vilken sida vill du se? Ta en skärmdump av varje sida.";
-    ["Sida 1", "Sida 2", "Sida 3", "Test 1 (utan spacer)", "Test 2 (utan spacer)", "Test 3 (utan spacer)"].forEach(t => a.addAction(t));
+    ["Sida 1", "Sida 2", "Sida 3"].forEach(t => a.addAction(t));
     page = (await a.presentAlert()) + 1;
   }
-  page = Math.min(6, Math.max(1, page || 1));
-  NP_VAR = page > 3;
-  if (NP_VAR) page -= 3;
+  page = Math.min(3, Math.max(1, page || 1));
   const names = NP_NAMES.slice((page - 1) * 20, page * 20);
   const lines = ["13", "14", "17", "18", "19", "10", "11", "27", "28", "28S", "29", "40", "41", "42X", "30", "22"];
   const t0 = Date.now();
