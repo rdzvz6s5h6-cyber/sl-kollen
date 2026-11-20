@@ -333,7 +333,7 @@ if (BUSVIEW && !SMALL) {
   const gm = new Map();
   for (const x of all) { const k = spKey(x.d); if (!gm.has(k)) gm.set(k, []); gm.get(k).push(x); }
   if (!gm.has("") && gm.size >= 2) {
-    const COLROWS = LARGE ? 5 : 3;
+    const COLROWS = LARGE ? 8 : 3;
     const gl = [...gm.values()].slice(0, 2);
     const lg = g => String(((g[0].d.stop_point || {}).designation) || "").trim();
     gl.sort((a, b) => lg(a).localeCompare(lg(b)));
@@ -358,7 +358,7 @@ const statusModes = CFG.transports[0] === "ALL"
 const status = error ? null : await loadStatus([...new Set(shown.map(x => String(x.d.line && x.d.line.designation)))], statusModes && statusModes.length ? statusModes : null);
 // Stor widget: störningar går före avgångar. Varje störning som visas helt tar ca två rader.
 const fullN = LARGE && status && status.kind === "bad" ? Math.min(status.items.length, MAX_FULL) : 0;
-if (fullN && groups) groups = groups.map(g => g.slice(0, Math.max(2, g.length - fullN)));
+if (fullN && groups) groups = groups.map(g => g.slice(0, Math.max(3, g.length - fullN)));
 else if (fullN) shown = shown.slice(0, Math.max(3, ROWS - fullN));
 
 const w = new ListWidget();
@@ -522,10 +522,10 @@ if (error) {
       lb.addSpacer();
       row.addSpacer(4);
       const dt = row.addText(shortName(d.destination));
-      dt.font = Font.mediumSystemFont(11);
+      dt.font = Font.mediumSystemFont(10);
       dt.textColor = Color.white();
       dt.lineLimit = 1;
-      dt.minimumScaleFactor = 0.6;
+      dt.minimumScaleFactor = 0.75;
       col.addSpacer(5);
     });
   });
