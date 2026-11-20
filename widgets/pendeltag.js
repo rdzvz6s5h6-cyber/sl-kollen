@@ -391,12 +391,22 @@ head.centerAlignContent();
 
 const contentW = Device.screenSize().width - 55 - 24; // uppskattad innehållsbredd
 const colW = Math.floor((contentW - 9) / 2);
+const ALLD = error ? [] : deps
+  .map(d => ({ d, i: info(d, now) }))
+  .filter(x => x.i.left >= -1)
+  .sort((a, b) => a.i.exp - b.i.exp);
+const NL = ALLD.filter(x => x.d.direction_code === 2);
+const SL = ALLD.filter(x => x.d.direction_code === 1);
+// Ändstation: tågen går bara åt ett håll. Då delas listan i två kolumner i tidsordning i stället för en tom kolumn.
+const TERM = !error && (NL.length === 0) !== (SL.length === 0);
+const TERM_LIST = NL.length ? NL : SL;
+const TERM_TITLE = NL.length ? "NORR" : "SÖDER";
 if (!SMALL && !error) {
   const band = w.addStack();
   band.backgroundColor = new Color("#1c1c1e");
   band.setPadding(3, 12, 3, 12);
   const bt = ["NORR", "SÖDER"];
-  bt.forEach((tt, bi) => {
+  (TERM ? [TERM_TITLE, ""] : bt).forEach((tt, bi) => {
     if (bi) band.addSpacer(9);
     const bc = band.addStack();
     bc.size = new Size(colW, 0);
@@ -467,26 +477,29 @@ if (error) {
   e.font = Font.systemFont(13);
   e.textColor = Color.orange();
 } else {
-  const all = deps
-    .map(d => ({ d, i: info(d, now) }))
-    .filter(x => x.i.left >= -1)
-    .sort((a, b) => a.i.exp - b.i.exp);
+  const all = ALLD;
   const body = content.addStack();
   if (SMALL) {
     body.layoutVertically();
     const nl = all.filter(x => x.d.direction_code === 2);
     const sl = all.filter(x => x.d.direction_code === 1);
-    smallRow(body, "NORR", nl[0]);
-    body.addSpacer(5);
-    smallRow(body, "SÖDER", sl[0]);
+    if (TERM) {
+      smallRow(body, TERM_TITLE, TERM_LIST[0]);
+      body.addSpacer(5);
+      smallRow(body, "DÄREFTER", TERM_LIST[1]);
+    } else {
+      smallRow(body, "NORR", nl[0]);
+      body.addSpacer(5);
+      smallRow(body, "SÖDER", sl[0]);
+    }
   } else {
-    column(body, "NORR", all.filter(x => x.d.direction_code === 2), colW);
+    column(body, "NORR", TERM ? TERM_LIST.slice(0, ROWS) : all.filter(x => x.d.direction_code === 2), colW);
     body.addSpacer(4);
     const div = body.addStack();
     div.size = new Size(1, 4 + ROWS * 23);
     div.backgroundColor = new Color("#2c2c2e");
     body.addSpacer(4);
-    column(body, "SÖDER", all.filter(x => x.d.direction_code === 1), colW);
+    column(body, "SÖDER", TERM ? TERM_LIST.slice(ROWS, ROWS * 2) : all.filter(x => x.d.direction_code === 1), colW);
   }
 }
 content.addSpacer();
