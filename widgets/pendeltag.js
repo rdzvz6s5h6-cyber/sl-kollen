@@ -167,7 +167,7 @@ function pill(parent, i, big, narrow) {
   const p = parent.addStack();
   p.backgroundColor = new Color(PAL[i.level].bg);
   p.cornerRadius = big ? 11 : 9;
-  p.size = new Size(W, 0);
+  p.size = new Size(W, narrow ? 22 : 0); // fast höjd i kolumner så att 'Inst.' inte ger lägre rader
   p.setPadding(1, lp, 1, 0);
   p.centerAlignContent();
   const fg = new Color(PAL[i.level].fg);
