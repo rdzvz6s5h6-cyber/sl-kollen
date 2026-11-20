@@ -43,8 +43,8 @@ const CONFIGS = {
       "hjulsta", "kista", "husby", "akalla", "solna strand", "huvudsta"],
   },
   roslagsbanan: {
-    key: "roslagsbanan", label: "Roslagsbanan", transport: "TRAIN", strict: true,
-    group: /roslags/i, nums: ["27", "28", "29"], color: "#8E4A9E", letter: "R",
+    key: "roslagsbanan", label: "Roslagsbanan", transport: "TRAIN", fetchModes: ["TRAIN", "TRAM"], strict: true,
+    group: /roslags/i, nums: ["27", "28", "28S", "29"], color: "#8E4A9E", letter: "R",
     titles: ["NORR", "SÖDER"], north: /kårsta|österskär|näsbypark/i, south: /östra|stockholm/i,
     names: ["stockholms östra", "universitetet", "tekniska högskolan", "stockholms östra",
       "mörby", "danderyds sjukhus", "djursholms ösby", "ösby", "stocksund", "altorp", "enebyberg",
@@ -160,21 +160,31 @@ const isRed = d => {
 };
 
 // Returnerar bara röda linjens avgångar. null = kunde inte hämta.
-async function fetchTrains(id) {
-  const req = new Request(`${BASE}/sites/${id}/departures?transport=${CFG.transport}`);
+async function fetchOne(id, mode) {
+  const req = new Request(`${BASE}/sites/${id}/departures?transport=${mode}`);
   req.timeoutInterval = 10;
   try {
     const data = await req.loadJSON();
     const code = req.response ? req.response.statusCode : 0;
     if (code !== 200 || !data.departures) return null;
-    data.departures.forEach(d => {
-      const l = d.line || {};
-      SEEN.add(`${l.designation || "?"}/${l.group_of_lines || "?"}`);
-    });
-    return data.departures.filter(isRed);
+    return data.departures;
   } catch (e) {
     return null;
   }
+}
+
+// Returnerar bara linjens avgångar. null = kunde inte hämta.
+// Roslagsbanan rapporteras av SL som både TRAIN och TRAM, så den frågar båda.
+async function fetchTrains(id) {
+  const parts = await Promise.all((CFG.fetchModes || [CFG.transport]).map(m => fetchOne(id, m)));
+  const ok = parts.filter(p => p);
+  if (!ok.length) return null;
+  const all = [].concat(...ok);
+  all.forEach(d => {
+    const l = d.line || {};
+    SEEN.add(`${l.designation || "?"}/${l.group_of_lines || "?"}`);
+  });
+  return all.filter(isRed);
 }
 
 // kind: "ok" (inga störningar, grön), "bad" (störning, gul), "fail" (kunde inte hämtas, grå)
