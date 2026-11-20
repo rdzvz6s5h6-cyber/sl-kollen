@@ -1,6 +1,6 @@
-// SL-kollen – Vald station: avgångar från en station du själv väljer (alla trafikslag)
-// Kopiera hela filen till ett nytt skript i Scriptable. Lägg ut widgeten, håll in den, välj Redigera widget och skriv stationens namn i Parameter (till exempel Årstaberg).
-const LINJE = "vald";
+// SL-kollen – Närmast station: avgångar från din närmaste SL-station eller hållplats (alla trafikslag)
+// Kopiera hela filen till ett nytt skript i Scriptable. Inget behöver ändras.
+const LINJE = "multi";
 
 const URL = "https://raw.githubusercontent.com/rdzvz6s5h6-cyber/SL-kollen/main/widgets/hallplats.js";
 
