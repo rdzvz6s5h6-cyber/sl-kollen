@@ -352,21 +352,20 @@ if (BUSVIEW && !SMALL) {
   const lg = g => String(((g[0].d.stop_point || {}).designation) || "").trim();
   // Rubrik: läge (om SL anger det) och linjerna som stannar vid stoppet. Lika rubriker får slutstation.
   const linesOf = g => [...new Set(g.map(x => String((x.d.line && x.d.line.designation) || "")))].sort((a, b) => a.localeCompare(b, "sv", { numeric: true }));
-  const mkHead = g => {
+  // Anger SL inget läge i två kolumner namnger vi dem Läge A och Läge B (i fast ordning efter stopp-id)
+  const mkHead = (g, i) => {
     const ln = linesOf(g);
     const lt = ln.length > 1 ? ln.join(", ") : `Linje ${ln[0]}`;
-    return lg(g) ? `Läge ${lg(g)} · ${lt}` : lt;
+    if (lg(g)) return `Läge ${lg(g)} · ${lt}`;
+    return i === undefined ? lt : `Läge ${String.fromCharCode(65 + i)} · ${lt}`;
   };
   if (!gm.has("") && gm.size === 1) {
     oneHead = mkHead([...gm.values()][0]);
   } else if (!gm.has("") && gm.size >= 2) {
     const COLROWS = LARGE ? 8 : 3;
     const gl = [...gm.values()].slice(0, 2);
-    gl.sort((a, b) => lg(a).localeCompare(lg(b)));
-    heads = gl.map(mkHead);
-    if (heads[0] === heads[1]) {
-      heads = gl.map((g, i) => `${heads[i]} · mot ${[...new Set(g.slice(0, 2).map(x => shortName(x.d.destination)))].join("/")}`);
-    }
+    gl.sort((a, b) => lg(a).localeCompare(lg(b)) || spKey(a[0].d).localeCompare(spKey(b[0].d), "sv", { numeric: true }));
+    heads = gl.map((g, i) => mkHead(g, i));
     groups = gl.map(g => g.slice(0, COLROWS));
     shown = groups.flat();
   }
