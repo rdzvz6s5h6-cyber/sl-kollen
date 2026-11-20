@@ -400,7 +400,7 @@ head.size = new Size(0, 36); // fast höjd så att iOS inte pressar ihop headern
 head.centerAlignContent();
 
 // Samma uppskattade widgetbredd som linjewidgetarna (skärmbredd - 55), så innehållet aldrig blir bredare än widgeten
-const COLW = Math.floor((Device.screenSize().width - 50 - 24 - 13) / 2); // vänster kolumn; höger kolumn tar resten av bredden
+const COLW = Math.floor((Device.screenSize().width - 44 - 24 - 13) / 2); // vänster kolumn; höger kolumn tar resten av bredden
 if (groups && !error) {
   const band = w.addStack();
   band.backgroundColor = new Color("#1c1c1e");
@@ -557,7 +557,7 @@ if (error) {
       const row = col.addStack();
       row.centerAlignContent();
       const num = String((d.line && d.line.designation) || "");
-      const bw = num.length > 3 ? 44 : 36;
+      const bw = num.length > 3 ? 42 : 34;
       const lb = row.addStack();
       lb.backgroundColor = new Color(badgeColor(d));
       lb.cornerRadius = 5;
@@ -571,11 +571,11 @@ if (error) {
       nt.minimumScaleFactor = 0.7;
       lb.addSpacer();
       row.addSpacer(5);
-      const MINW = 44;
+      const MINW = 40;
       const ds = row.addStack();
-      ds.size = new Size(colW - bw - MINW - 10, 0);
+      ds.size = new Size(colW - bw - MINW - 16, 0); // 6 pt marginal så att 'min' aldrig klipps
       const dt = ds.addText(shortName(d.destination));
-      dt.font = Font.mediumSystemFont(12);
+      dt.font = Font.mediumSystemFont(13);
       dt.textColor = Color.white();
       dt.lineLimit = 1;
       dt.minimumScaleFactor = 0.6; // korta namn behåller stor stil, långa krymper
